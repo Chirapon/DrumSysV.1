@@ -18,7 +18,6 @@
 </head>
 <body class="bg-slate-100 h-screen flex overflow-hidden">
 
-    <!-- Sidebar Navigation -->
     <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 transition-transform transform -translate-x-full md:relative md:translate-x-0 flex flex-col">
         <div class="flex items-center justify-between p-4 bg-slate-950">
             <span class="text-xl font-bold text-white flex items-center gap-2">
@@ -69,11 +68,10 @@
             </ul>
         </nav>
         <div class="p-4 bg-slate-950 text-xs text-slate-500 text-center">
-            v2.0.0 Empty Drum System (HTML)
+            v2.1.0 Empty Drum System (HTML)
         </div>
     </div>
 
-    <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header class="md:hidden bg-white border-b border-slate-200 p-4 flex items-center gap-3">
             <button onclick="toggleSidebar()" class="text-slate-600 hover:text-slate-900">
@@ -114,9 +112,6 @@
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                                 <h3 class="font-semibold text-slate-700">ฟอร์มบันทึกรับเข้า</h3>
-                                <button type="button" onclick="simulateScanQR()" class="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
-                                    <i data-lucide="camera" class="w-4 h-4"></i> จำลองสแกน QR Code
-                                </button>
                             </div>
                             <form id="inbound-form" onsubmit="handleInboundSubmit(event)" class="p-6 space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -185,8 +180,8 @@
                         <h2 class="text-2xl font-bold text-slate-800">จ่ายถังออก (Outbound)</h2>
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <div class="flex border-b border-slate-200">
-                                <button onclick="setOutboundMode('filling')" id="btn-mode-filling" class="flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600">ส่งไปบรรจุ (Filling)</button>
-                                <button onclick="setOutboundMode('disposal')" id="btn-mode-disposal" class="flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50">จำหน่าย/ทิ้ง (Disposal)</button>
+                                <button type="button" onclick="setOutboundMode('filling')" id="btn-mode-filling" class="flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600">ส่งไปบรรจุ (Filling)</button>
+                                <button type="button" onclick="setOutboundMode('disposal')" id="btn-mode-disposal" class="flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50">จำหน่าย/ทิ้ง (Disposal)</button>
                             </div>
                             <form id="outbound-form" onsubmit="handleOutboundSubmit(event)" class="p-6 space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -338,7 +333,7 @@
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <h3 class="font-bold text-slate-800">แก้ไขรายการ</h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form id="edit-form" onsubmit="saveEditedTransaction(event)" class="p-6 space-y-4">
                 <input type="hidden" id="edit-id">
@@ -369,7 +364,7 @@
         <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden text-center">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <h3 class="font-bold text-slate-800">QR Code ประจำจุด</h3>
-                <button onclick="closeQRModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button type="button" onclick="closeQRModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-6 flex flex-col items-center">
                 <h4 id="qr-modal-title" class="text-lg font-bold text-slate-800 mb-4"></h4>
@@ -382,7 +377,6 @@
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    <!-- Application Logic Script -->
     <script>
         // State Management
         let drumTypes = [
@@ -399,35 +393,70 @@
         let lineChartInstance = null;
         const prevOccupancyMap = {};
 
+        // Helper: Generate Unique ID
+        function generateId(prefix = 'id') {
+            return prefix + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Helper: Escape HTML to Prevent XSS
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // Initialization on Load
         window.onload = function() {
             lucide.createIcons();
-            document.getElementById('in-date').valueAsDate = new Date();
-            document.getElementById('out-date').valueAsDate = new Date();
+            const inDateEl = document.getElementById('in-date');
+            const outDateEl = document.getElementById('out-date');
+            if (inDateEl) inDateEl.valueAsDate = new Date();
+            if (outDateEl) outDateEl.valueAsDate = new Date();
 
             loadState();
             checkURLParams();
             renderAll();
         };
 
+        // Backup State to LocalStorage
         function saveState() {
-            localStorage.setItem('drum_types', JSON.stringify(drumTypes));
-            localStorage.setItem('drum_transactions', JSON.stringify(transactions));
+            try {
+                localStorage.setItem('drum_types', JSON.stringify(drumTypes));
+                localStorage.setItem('drum_transactions', JSON.stringify(transactions));
+            } catch (err) {
+                console.error("Failed to save state:", err);
+            }
         }
 
+        // Load State from LocalStorage with fallback & validation
         function loadState() {
-            const savedTypes = localStorage.getItem('drum_types');
-            const savedTx = localStorage.getItem('drum_transactions');
-            if (savedTypes) drumTypes = JSON.parse(savedTypes);
-            if (savedTx) transactions = JSON.parse(savedTx);
+            try {
+                const savedTypes = localStorage.getItem('drum_types');
+                const savedTx = localStorage.getItem('drum_transactions');
+                if (savedTypes) {
+                    const parsedTypes = JSON.parse(savedTypes);
+                    if (Array.isArray(parsedTypes)) drumTypes = parsedTypes;
+                }
+                if (savedTx) {
+                    const parsedTx = JSON.parse(savedTx);
+                    if (Array.isArray(parsedTx)) transactions = parsedTx;
+                }
+            } catch (err) {
+                console.error("Failed to load state, using defaults:", err);
+            }
         }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
+            if (!container) return;
             const toast = document.createElement('div');
             const bgColor = type === 'error' ? 'bg-red-600' : type === 'warning' ? 'bg-orange-500' : 'bg-green-600';
             toast.className = `flex items-center gap-3 px-5 py-4 rounded-lg shadow-xl text-white ${bgColor} transition-all transform translate-y-2 opacity-0`;
-            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle-2' : 'alert-triangle'}" class="w-6 h-6"></i><span class="font-medium text-lg">${message}</span>`;
+            toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle-2' : 'alert-triangle'}" class="w-6 h-6"></i><span class="font-medium text-lg">${escapeHTML(message)}</span>`;
             container.appendChild(toast);
             lucide.createIcons();
 
@@ -440,12 +469,14 @@
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
+            if (sidebar) sidebar.classList.toggle('-translate-x-full');
         }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-blue-600', 'text-white');
                 btn.classList.add('hover:bg-slate-800', 'hover:text-white', 'text-slate-300');
@@ -474,13 +505,17 @@
                     if (drumSelect) drumSelect.value = drumId;
                     if (supplier) {
                         const supSelect = document.getElementById('in-supplier');
-                        supSelect.value = supplier;
-                        toggleSupplierOther(supplier);
+                        if (supSelect) {
+                            supSelect.value = supplier;
+                            toggleSupplierOther(supplier);
+                        }
                     }
                     if (location) {
                         const locSelect = document.getElementById('in-location');
-                        locSelect.value = location;
-                        toggleLocationOther(location);
+                        if (locSelect) {
+                            locSelect.value = location;
+                            toggleLocationOther(location);
+                        }
                     }
                     showToast('สแกน QR สำเร็จ! พร้อมบันทึกรับเข้า', 'success');
                 }, 300);
@@ -496,7 +531,7 @@
                 const qtyOutDispose = typeTx.filter(t => t.type === 'OUT_DISPOSE').reduce((sum, t) => sum + t.qty, 0);
                 
                 const balance = qtyIn - qtyOutFill - qtyOutDispose;
-                const occupancy = drum.capacity > 0 ? Number(((balance / drum.capacity) * 100).toFixed(1)) : 0;
+                const occupancy = drum.capacity > 0 ? Number((Math.max(0, balance / drum.capacity) * 100).toFixed(1)) : 0;
                 
                 let alert = { level: 'NORMAL', label: 'Normal', color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-200', bar: 'bg-green-500' };
                 if (occupancy >= 100) alert = { level: 'FULL', label: 'Storage Full', color: 'text-red-700', bg: 'bg-red-100', border: 'border-red-500', bar: 'bg-red-500' };
@@ -534,13 +569,15 @@
         function renderDropdowns(statusList) {
             const inSelect = document.getElementById('in-drum-type');
             const outSelect = document.getElementById('out-drum-type');
+            if (!inSelect || !outSelect) return;
             
             let inOpts = '<option value="">-- เลือกประเภทถัง --</option>';
             let outOpts = '<option value="">-- เลือกประเภทถัง --</option>';
             
             statusList.forEach(d => {
-                inOpts += `<option value="${d.id}">${d.name} (ว่าง ${d.capacity - d.balance} ใบ)</option>`;
-                outOpts += `<option value="${d.id}">${d.name} (มีในสต๊อก ${d.balance} ใบ)</option>`;
+                const availableSpace = Math.max(0, d.capacity - d.balance);
+                inOpts += `<option value="${escapeHTML(d.id)}">${escapeHTML(d.name)} (ว่าง ${availableSpace} ใบ)</option>`;
+                outOpts += `<option value="${escapeHTML(d.id)}">${escapeHTML(d.name)} (มีในสต๊อก ${d.balance} ใบ)</option>`;
             });
             
             inSelect.innerHTML = inOpts;
@@ -550,18 +587,19 @@
         // Render Dashboard
         function renderDashboard(statusList) {
             const container = document.getElementById('dashboard-cards');
+            if (!container) return;
             container.innerHTML = statusList.map(drum => `
-                <div class="bg-white rounded-xl shadow-sm border-l-4 p-4 ${drum.alert.border}">
+                <div class="bg-white rounded-xl shadow-sm border-l-4 p-4 ${escapeHTML(drum.alert.border)}">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-700">${drum.name}</h3>
+                            <h3 class="text-lg font-semibold text-slate-700">${escapeHTML(drum.name)}</h3>
                             <div class="mt-2 text-3xl font-bold text-slate-900">
                                 ${drum.balance} <span class="text-sm font-normal text-slate-500">/ ${drum.capacity} ใบ</span>
                             </div>
                         </div>
                         ${drum.occupancy >= 80 ? `
-                            <div class="px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 ${drum.alert.bg} ${drum.alert.color}">
-                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> ${drum.alert.label}
+                            <div class="px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 ${escapeHTML(drum.alert.bg)} ${escapeHTML(drum.alert.color)}">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> ${escapeHTML(drum.alert.label)}
                             </div>
                         ` : ''}
                     </div>
@@ -571,7 +609,7 @@
                             <span class="font-semibold">${drum.occupancy}%</span>
                         </div>
                         <div class="w-full bg-slate-200 rounded-full h-2.5">
-                            <div class="h-2.5 rounded-full ${drum.alert.bar}" style="width: ${Math.min(drum.occupancy, 100)}%"></div>
+                            <div class="h-2.5 rounded-full ${escapeHTML(drum.alert.bar)}" style="width: ${Math.min(drum.occupancy, 100)}%"></div>
                         </div>
                     </div>
                 </div>
@@ -579,24 +617,29 @@
             lucide.createIcons();
         }
 
-        // Charts
+        // Charts Update with context safety check
         function updateCharts() {
             const statusList = getInventoryStatus();
             
             // Bar Chart
-            const barCtx = document.getElementById('barChart').getContext('2d');
-            if (barChartInstance) barChartInstance.destroy();
-            barChartInstance = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: statusList.map(d => d.name),
-                    datasets: [
-                        { label: 'จำนวนคงเหลือ', data: statusList.map(d => d.balance), backgroundColor: '#3b82f6', borderRadius: 4 },
-                        { label: 'ความจุสูงสุด', data: statusList.map(d => d.capacity), backgroundColor: '#cbd5e1', borderRadius: 4 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            const barCanvas = document.getElementById('barChart');
+            if (barCanvas) {
+                const barCtx = barCanvas.getContext('2d');
+                if (barCtx) {
+                    if (barChartInstance) barChartInstance.destroy();
+                    barChartInstance = new Chart(barCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: statusList.map(d => d.name),
+                            datasets: [
+                                { label: 'จำนวนคงเหลือ', data: statusList.map(d => d.balance), backgroundColor: '#3b82f6', borderRadius: 4 },
+                                { label: 'ความจุสูงสุด', data: statusList.map(d => d.capacity), backgroundColor: '#cbd5e1', borderRadius: 4 }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            }
 
             // Line Chart Trend
             const trendMap = {};
@@ -607,40 +650,39 @@
             });
             const sortedDates = Object.keys(trendMap).sort();
             
-            const lineCtx = document.getElementById('lineChart').getContext('2d');
-            if (lineChartInstance) lineChartInstance.destroy();
-            lineChartInstance = new Chart(lineCtx, {
-                type: 'line',
-                data: {
-                    labels: sortedDates.length ? sortedDates : ['วันนี้'],
-                    datasets: [
-                        { label: 'รับเข้า', data: sortedDates.map(d => trendMap[d].inbound), borderColor: '#10b981', tension: 0.1 },
-                        { label: 'จ่ายออก', data: sortedDates.map(d => trendMap[d].outbound), borderColor: '#ef4444', tension: 0.1 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            const lineCanvas = document.getElementById('lineChart');
+            if (lineCanvas) {
+                const lineCtx = lineCanvas.getContext('2d');
+                if (lineCtx) {
+                    if (lineChartInstance) lineChartInstance.destroy();
+                    lineChartInstance = new Chart(lineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: sortedDates.length ? sortedDates : ['วันนี้'],
+                            datasets: [
+                                { label: 'รับเข้า', data: sortedDates.map(d => trendMap[d].inbound), borderColor: '#10b981', tension: 0.1 },
+                                { label: 'จ่ายออก', data: sortedDates.map(d => trendMap[d].outbound), borderColor: '#ef4444', tension: 0.1 }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            }
         }
 
         // Form Toggles & Handlers
         function toggleSupplierOther(val) {
             const otherInput = document.getElementById('in-other-supplier');
+            if (!otherInput) return;
             if (val === 'Other') otherInput.classList.remove('hidden');
             else otherInput.classList.add('hidden');
         }
 
         function toggleLocationOther(val) {
             const otherInput = document.getElementById('in-other-location');
+            if (!otherInput) return;
             if (val === 'อื่นๆ') otherInput.classList.remove('hidden');
             else otherInput.classList.add('hidden');
-        }
-
-        function simulateScanQR() {
-            if (drumTypes.length === 0) return;
-            document.getElementById('in-drum-type').value = drumTypes[0].id;
-            document.getElementById('in-supplier').value = 'VSC';
-            document.getElementById('in-location').value = 'ล็อค 1';
-            showToast('สแกน QR Code สำเร็จ!', 'success');
         }
 
         function handleInboundSubmit(e) {
@@ -648,7 +690,13 @@
             const drumId = document.getElementById('in-drum-type').value;
             const statusList = getInventoryStatus();
             const selectedDrum = statusList.find(d => d.id === drumId);
-            const qty = Number(document.getElementById('in-qty').value);
+            const qtyInput = document.getElementById('in-qty');
+            const qty = qtyInput ? Number(qtyInput.value) : 0;
+
+            if (qty <= 0) {
+                showToast('กรุณาระบุจำนวนมากกว่า 0', 'error');
+                return;
+            }
 
             if (selectedDrum && (selectedDrum.balance + qty) > selectedDrum.capacity) {
                 showToast('ไม่สามารถรับเข้าได้ พื้นที่จัดเก็บเต็มความจุแล้ว!', 'error');
@@ -662,7 +710,7 @@
             const location = locationVal === 'อื่นๆ' ? document.getElementById('in-other-location').value : locationVal;
 
             const newTx = {
-                id: 'tx_' + Date.now(),
+                id: generateId('tx'),
                 date: document.getElementById('in-date').value,
                 type: 'IN',
                 drumTypeId: drumId,
@@ -676,8 +724,10 @@
             transactions.push(newTx);
             saveState();
             renderAll();
-            document.getElementById('inbound-form').reset();
-            document.getElementById('in-date').valueAsDate = new Date();
+            const form = document.getElementById('inbound-form');
+            if (form) form.reset();
+            const dateEl = document.getElementById('in-date');
+            if (dateEl) dateEl.valueAsDate = new Date();
             showToast('บันทึกรับถังเข้าสำเร็จ', 'success');
         }
 
@@ -690,20 +740,25 @@
             const submitBtn = document.getElementById('outbound-submit-btn');
 
             if (mode === 'filling') {
-                btnFill.className = "flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600";
-                btnDisp.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
-                f1Label.innerText = "ผู้เบิก";
-                document.getElementById('out-field-1').placeholder = "";
-                f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">หน่วยงาน/แผนก</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
-                submitBtn.className = "px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2";
-                submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกส่งบรรจุ';
+                if (btnFill) btnFill.className = "flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600";
+                if (btnDisp) btnDisp.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
+                if (f1Label) f1Label.innerText = "ผู้เบิก";
+                const f1Input = document.getElementById('out-field-1');
+                if (f1Input) f1Input.placeholder = "";
+                if (f2Container) f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">หน่วยงาน/แผนก</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
+                if (submitBtn) {
+                    submitBtn.className = "px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2";
+                    submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกส่งบรรจุ';
+                }
             } else {
-                btnDisp.className = "flex-1 py-3 text-center font-medium bg-red-50 text-red-700 border-b-2 border-red-600";
-                btnFill.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
-                f1Label.innerText = "ผู้อนุมัติ";
-                f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">เหตุผลการจำหน่าย</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
-                submitBtn.className = "px-6 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center gap-2";
-                submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกจำหน่าย';
+                if (btnDisp) btnDisp.className = "flex-1 py-3 text-center font-medium bg-red-50 text-red-700 border-b-2 border-red-600";
+                if (btnFill) btnFill.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
+                if (f1Label) f1Label.innerText = "ผู้อนุมัติ";
+                if (f2Container) f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">เหตุผลการจำหน่าย</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
+                if (submitBtn) {
+                    submitBtn.className = "px-6 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center gap-2";
+                    submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกจำหน่าย';
+                }
             }
             lucide.createIcons();
         }
@@ -711,9 +766,15 @@
         function handleOutboundSubmit(e) {
             e.preventDefault();
             const drumId = document.getElementById('out-drum-type').value;
-            const qty = Number(document.getElementById('out-qty').value);
+            const qtyInput = document.getElementById('out-qty');
+            const qty = qtyInput ? Number(qtyInput.value) : 0;
             const statusList = getInventoryStatus();
             const selectedDrum = statusList.find(d => d.id === drumId);
+
+            if (qty <= 0) {
+                showToast('กรุณาระบุจำนวนมากกว่า 0', 'error');
+                return;
+            }
 
             if (selectedDrum && qty > selectedDrum.balance) {
                 showToast('ไม่สามารถจ่ายออกได้ จำนวนในสต๊อกไม่เพียงพอ!', 'error');
@@ -722,7 +783,7 @@
 
             const isFilling = outboundMode === 'filling';
             const newTx = {
-                id: 'tx_' + Date.now(),
+                id: generateId('tx'),
                 date: document.getElementById('out-date').value,
                 type: isFilling ? 'OUT_FILL' : 'OUT_DISPOSE',
                 drumTypeId: drumId,
@@ -734,28 +795,31 @@
             transactions.push(newTx);
             saveState();
             renderAll();
-            document.getElementById('outbound-form').reset();
-            document.getElementById('out-date').valueAsDate = new Date();
+            const form = document.getElementById('outbound-form');
+            if (form) form.reset();
+            const dateEl = document.getElementById('out-date');
+            if (dateEl) dateEl.valueAsDate = new Date();
             showToast('บันทึกจ่ายถังออกสำเร็จ', 'success');
         }
 
         // Render Inventory Table
         function renderInventory(statusList) {
             const tbody = document.getElementById('inventory-table-body');
+            if (!tbody) return;
             tbody.innerHTML = statusList.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-4 font-medium text-slate-900">${item.name}</td>
+                    <td class="p-4 font-medium text-slate-900">${escapeHTML(item.name)}</td>
                     <td class="p-4 text-right text-blue-600">+${item.qtyIn.toLocaleString()}</td>
                     <td class="p-4 text-right text-orange-500">-${item.qtyOutFill.toLocaleString()}</td>
                     <td class="p-4 text-right text-red-500">-${item.qtyOutDispose.toLocaleString()}</td>
                     <td class="p-4 text-right font-bold text-slate-900 text-lg">${item.balance.toLocaleString()}</td>
                     <td class="p-4">
                         <div class="flex flex-col items-center gap-1">
-                            <span class="text-xs font-semibold px-2 py-1 rounded-full ${item.alert.bg} ${item.alert.color}">
-                                ${item.occupancy}% (${item.alert.label})
+                            <span class="text-xs font-semibold px-2 py-1 rounded-full ${escapeHTML(item.alert.bg)} ${escapeHTML(item.alert.color)}">
+                                ${item.occupancy}% (${escapeHTML(item.alert.label)})
                             </span>
                             <div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                <div class="h-full ${item.alert.bar}" style="width: ${Math.min(item.occupancy, 100)}%"></div>
+                                <div class="h-full ${escapeHTML(item.alert.bar)}" style="width: ${Math.min(item.occupancy, 100)}%"></div>
                             </div>
                         </div>
                     </td>
@@ -766,15 +830,19 @@
         // Render History Table & Actions
         function renderHistory() {
             const tbody = document.getElementById('history-table-body');
-            const search = document.getElementById('history-search').value.toLowerCase();
-            const filter = document.getElementById('history-filter').value;
+            const searchEl = document.getElementById('history-search');
+            const filterEl = document.getElementById('history-filter');
+            if (!tbody || !searchEl || !filterEl) return;
+
+            const search = searchEl.value.toLowerCase();
+            const filter = filterEl.value;
 
             let filtered = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
             if (filter !== 'all') filtered = filtered.filter(t => t.type === filter);
             if (search) {
                 filtered = filtered.filter(t => {
                     const drum = drumTypes.find(d => d.id === t.drumTypeId)?.name || '';
-                    const detail = `${t.receiver || ''} ${t.supplier || ''} ${t.requester || ''} ${t.department || ''} ${t.approver || ''} ${t.reason || ''}`.toLowerCase();
+                    const detail = `${t.receiver || ''} ${t.supplier || ''} ${t.location || ''} ${t.remark || ''} ${t.requester || ''} ${t.department || ''} ${t.approver || ''} ${t.reason || ''}`.toLowerCase();
                     return drum.toLowerCase().includes(search) || detail.includes(search) || t.date.includes(search);
                 });
             }
@@ -782,26 +850,26 @@
             tbody.innerHTML = filtered.map(tx => {
                 const drumName = drumTypes.find(d => d.id === tx.drumTypeId)?.name || 'Unknown';
                 let label = 'รับเข้า', style = 'text-green-700 bg-green-50 border-green-200';
-                let detail = `ผู้รับ: ${tx.receiver} | จาก: ${tx.supplier}`;
+                let detail = `ผู้รับ: ${escapeHTML(tx.receiver || '')} | จาก: ${escapeHTML(tx.supplier || '')} | โซน: ${escapeHTML(tx.location || '')}`;
                 if (tx.type === 'OUT_FILL') {
                     label = 'ส่งบรรจุ'; style = 'text-blue-700 bg-blue-50 border-blue-200';
-                    detail = `ผู้เบิก: ${tx.requester} | แผนก: ${tx.department}`;
+                    detail = `ผู้เบิก: ${escapeHTML(tx.requester || '')} | แผนก: ${escapeHTML(tx.department || '')}`;
                 } else if (tx.type === 'OUT_DISPOSE') {
                     label = 'จำหน่าย'; style = 'text-red-700 bg-red-50 border-red-200';
-                    detail = `ผู้อนุมัติ: ${tx.approver} | เหตุผล: ${tx.reason}`;
+                    detail = `ผู้อนุมัติ: ${escapeHTML(tx.approver || '')} | เหตุผล: ${escapeHTML(tx.reason || '')}`;
                 }
 
                 return `
                     <tr class="hover:bg-slate-50">
-                        <td class="p-3 whitespace-nowrap text-slate-700">${tx.date}</td>
+                        <td class="p-3 whitespace-nowrap text-slate-700">${escapeHTML(tx.date)}</td>
                         <td class="p-3"><span class="px-2 py-1 rounded text-xs font-medium border ${style}">${label}</span></td>
-                        <td class="p-3 font-medium text-slate-800">${drumName}</td>
+                        <td class="p-3 font-medium text-slate-800">${escapeHTML(drumName)}</td>
                         <td class="p-3 text-right font-semibold text-slate-800">${tx.qty.toLocaleString()}</td>
                         <td class="p-3 text-slate-600 truncate max-w-xs">${detail}</td>
                         <td class="p-3 text-center">
                             <div class="flex items-center justify-center gap-3">
-                                <button onclick="openEditModal('${tx.id}')" class="text-slate-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                <button onclick="deleteTransaction('${tx.id}')" class="text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                <button type="button" onclick="openEditModal('${escapeHTML(tx.id)}')" class="text-slate-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                <button type="button" onclick="deleteTransaction('${escapeHTML(tx.id)}')" class="text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -822,51 +890,87 @@
         function openEditModal(id) {
             const tx = transactions.find(t => t.id === id);
             if (!tx) return;
-            document.getElementById('edit-id').value = tx.id;
-            document.getElementById('edit-date').value = tx.date;
-            document.getElementById('edit-qty').value = tx.qty;
-            document.getElementById('edit-remark').value = tx.remark || tx.reason || tx.department || '';
-            document.getElementById('edit-modal').classList.remove('hidden');
+            const editId = document.getElementById('edit-id');
+            const editDate = document.getElementById('edit-date');
+            const editQty = document.getElementById('edit-qty');
+            const editRemark = document.getElementById('edit-remark');
+            const editModal = document.getElementById('edit-modal');
+
+            if (editId) editId.value = tx.id;
+            if (editDate) editDate.value = tx.date;
+            if (editQty) editQty.value = tx.qty;
+            if (editRemark) editRemark.value = tx.remark || tx.reason || tx.department || '';
+            if (editModal) editModal.classList.remove('hidden');
         }
 
         function closeEditModal() {
-            document.getElementById('edit-modal').classList.add('hidden');
+            const editModal = document.getElementById('edit-modal');
+            if (editModal) editModal.classList.add('hidden');
         }
 
         function saveEditedTransaction(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
-            const tx = transactions.find(t => t.id === id);
-            if (tx) {
-                tx.date = document.getElementById('edit-date').value;
-                tx.qty = Number(document.getElementById('edit-qty').value);
-                const remarkVal = document.getElementById('edit-remark').value;
-                if (tx.type === 'IN') tx.remark = remarkVal;
-                else if (tx.type === 'OUT_FILL') tx.department = remarkVal;
-                else tx.reason = remarkVal;
+            const txIndex = transactions.findIndex(t => t.id === id);
+            if (txIndex === -1) return;
 
-                saveState();
-                renderAll();
-                closeEditModal();
-                showToast('แก้ไขข้อมูลสำเร็จ', 'success');
+            const originalTx = transactions[txIndex];
+            const newDate = document.getElementById('edit-date').value;
+            const newQty = Number(document.getElementById('edit-qty').value);
+            const remarkVal = document.getElementById('edit-remark').value;
+
+            if (newQty <= 0) {
+                showToast('กรุณาระบุจำนวนมากกว่า 0', 'error');
+                return;
             }
+
+            // Test if edit causes negative stock balance
+            const testTransactions = [...transactions];
+            testTransactions[txIndex] = { ...originalTx, date: newDate, qty: newQty };
+            
+            // Check all drum types validity under testTransactions
+            for (let drum of drumTypes) {
+                const typeTxs = testTransactions.filter(t => t.drumTypeId === drum.id);
+                const qIn = typeTxs.filter(t => t.type === 'IN').reduce((s, t) => s + t.qty, 0);
+                const qOut = typeTxs.filter(t => t.type !== 'IN').reduce((s, t) => s + t.qty, 0);
+                if ((qIn - qOut) < 0) {
+                    showToast('ไม่สามารถบันทึกได้เนื่องจากจำนวนสต๊อกคงเหลือจะติดลบ', 'error');
+                    return;
+                }
+                if (qIn - qOut > drum.capacity) {
+                    showToast('ไม่สามารถบันทึกได้เนื่องจากเกินความจุสูงสุด', 'error');
+                    return;
+                }
+            }
+
+            originalTx.date = newDate;
+            originalTx.qty = newQty;
+            if (originalTx.type === 'IN') originalTx.remark = remarkVal;
+            else if (originalTx.type === 'OUT_FILL') originalTx.department = remarkVal;
+            else originalTx.reason = remarkVal;
+
+            saveState();
+            renderAll();
+            closeEditModal();
+            showToast('แก้ไขข้อมูลสำเร็จ', 'success');
         }
 
         // Settings (Admin)
         function renderSettings() {
             const container = document.getElementById('settings-drum-list');
+            if (!container) return;
             container.innerHTML = drumTypes.map(drum => `
                 <div class="flex items-center justify-between p-4 border border-slate-200 rounded-lg bg-slate-50 gap-4">
                     <div class="flex items-center gap-4">
-                        <div class="w-5 h-5 rounded-full border border-black/10" style="background-color: ${drum.color}"></div>
+                        <div class="w-5 h-5 rounded-full border border-black/10" style="background-color: ${escapeHTML(drum.color)}"></div>
                         <div>
-                            <span class="font-semibold text-slate-800 text-lg">${drum.name}</span>
+                            <span class="font-semibold text-slate-800 text-lg">${escapeHTML(drum.name)}</span>
                             <div class="text-sm text-slate-500">ความจุสูงสุด: ${drum.capacity.toLocaleString()} ใบ</div>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="showQR('${drum.id}')" class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-md" title="QR Code"><i data-lucide="qr-code" class="w-5 h-5"></i></button>
-                        <button onclick="deleteDrumType('${drum.id}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md" title="ลบ"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        <button type="button" onclick="showQR('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-md" title="QR Code"><i data-lucide="qr-code" class="w-5 h-5"></i></button>
+                        <button type="button" onclick="deleteDrumType('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md" title="ลบ"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -875,10 +979,15 @@
 
         function handleAddDrumType(e) {
             e.preventDefault();
-            const name = document.getElementById('new-drum-name').value;
-            const capacity = Number(document.getElementById('new-drum-capacity').value);
-            const color = document.getElementById('new-drum-color').value;
-            const newId = 'dt_' + Date.now();
+            const nameEl = document.getElementById('new-drum-name');
+            const capEl = document.getElementById('new-drum-capacity');
+            const colorEl = document.getElementById('new-drum-color');
+            if (!nameEl || !capEl || !colorEl) return;
+
+            const name = nameEl.value;
+            const capacity = Number(capEl.value);
+            const color = colorEl.value;
+            const newId = generateId('dt');
 
             drumTypes.push({ id: newId, name, capacity, color });
             saveState();
@@ -903,16 +1012,23 @@
         function showQR(id) {
             const drum = drumTypes.find(d => d.id === id);
             if (!drum) return;
-            document.getElementById('qr-modal-title').innerText = drum.name;
-            const targetUrl = `${window.location.origin}${window.location.pathname}?action=inbound&drumId=${drum.id}&supplier=VSC&location=ล็อค 1`;
-            document.getElementById('qr-image-container').innerHTML = `
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}" class="w-48 h-48 mx-auto" alt="QR">
-            `;
-            document.getElementById('qr-modal').classList.remove('hidden');
+            const titleEl = document.getElementById('qr-modal-title');
+            const container = document.getElementById('qr-image-container');
+            const modal = document.getElementById('qr-modal');
+
+            if (titleEl) titleEl.innerText = drum.name;
+            const targetUrl = `${window.location.origin}${window.location.pathname}?action=inbound&drumId=${encodeURIComponent(drum.id)}&supplier=VSC&location=ล็อค 1`;
+            if (container) {
+                container.innerHTML = `
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}" class="w-48 h-48 mx-auto" alt="QR">
+                `;
+            }
+            if (modal) modal.classList.remove('hidden');
         }
 
         function closeQRModal() {
-            document.getElementById('qr-modal').classList.add('hidden');
+            const modal = document.getElementById('qr-modal');
+            if (modal) modal.classList.add('hidden');
         }
 
         // CSV Exports
@@ -928,7 +1044,7 @@
             const headers = ["วันที่", "ประเภทรายการ", "ประเภทถัง", "จำนวน", "รายละเอียด"];
             const rows = transactions.map(t => {
                 const drumName = drumTypes.find(d => d.id === t.drumTypeId)?.name || "";
-                let detail = t.type === 'IN' ? `${t.receiver} - ${t.supplier}` : t.type === 'OUT_FILL' ? `${t.requester} - ${t.department}` : `${t.approver} - ${t.reason}`;
+                let detail = t.type === 'IN' ? `${t.receiver} - ${t.supplier} (${t.location || ''})` : t.type === 'OUT_FILL' ? `${t.requester} - ${t.department}` : `${t.approver} - ${t.reason}`;
                 return [t.date, t.type, drumName, t.qty, `"${detail}"`];
             });
             downloadCSV("history_" + Date.now() + ".csv", [headers, ...rows]);
@@ -942,6 +1058,7 @@
             link.href = URL.createObjectURL(blob);
             link.download = filename;
             link.click();
+            URL.revokeObjectURL(link.href);
         }
     </script>
 </body>

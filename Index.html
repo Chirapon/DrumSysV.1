@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Empty Drum Management System</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Inter & Thai Support -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -82,13 +78,9 @@
 
         <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <div class="max-w-7xl mx-auto">
-                
-                <!-- TAB 1: DASHBOARD -->
                 <div id="tab-dashboard" class="tab-content space-y-6">
                     <h2 class="text-2xl font-bold text-slate-800">Dashboard</h2>
-                    <div id="dashboard-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Dynamic Cards -->
-                    </div>
+                    <div id="dashboard-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                             <h3 class="text-lg font-semibold text-slate-700 mb-4">สถานะคงเหลือแยกตามประเภท</h3>
@@ -105,7 +97,6 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: INBOUND -->
                 <div id="tab-inbound" class="tab-content space-y-6 hidden">
                     <div class="max-w-3xl mx-auto space-y-6">
                         <h2 class="text-2xl font-bold text-slate-800">รับถังเปล่า (Inbound)</h2>
@@ -121,7 +112,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">ผู้รับถัง</label>
-                                        <input type="text" id="in-receiver" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ชื่อพนักงาน">
+                                        <input type="text" id="in-receiver" required placeholder="ชื่อผู้รับ" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">บริษัทผู้ส่ง (Supplier)</label>
@@ -132,11 +123,12 @@
                                             <option value="VSI">VSI</option>
                                             <option value="Other">Other (อื่นๆ)</option>
                                         </select>
-                                        <input type="text" id="in-other-supplier" placeholder="โปรดระบุชื่อบริษัทอื่นๆ" class="w-full rounded-md border border-slate-300 px-3 py-2 mt-2 hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <input type="text" id="in-other-supplier" placeholder="โปรดระบุชื่อบริษัทอื่นๆ" class="hidden w-full mt-2 rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">ตำแหน่งจัดเก็บ (Location)</label>
                                         <select id="in-location" required onchange="toggleLocationOther(this.value)" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="">-- เลือกตำแหน่ง --</option>
                                             <option value="ล็อค 1">ล็อค 1</option>
                                             <option value="ล็อค 2">ล็อค 2</option>
                                             <option value="ล็อค 3">ล็อค 3</option>
@@ -144,9 +136,9 @@
                                             <option value="ล็อค 5">ล็อค 5</option>
                                             <option value="อื่นๆ">อื่นๆ</option>
                                         </select>
-                                        <input type="text" id="in-other-location" placeholder="โปรดระบุตำแหน่งอื่นๆ" class="w-full rounded-md border border-slate-300 px-3 py-2 mt-2 hidden focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <input type="text" id="in-other-location" placeholder="โปรดระบุตำแหน่งอื่นๆ" class="hidden w-full mt-2 rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
-                                    
+
                                     <div class="md:col-span-2 border-t border-slate-100 pt-4 mt-2">
                                         <label class="block text-sm font-medium text-slate-700 mb-1">ประเภทถัง</label>
                                         <select id="in-drum-type" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -174,14 +166,13 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: OUTBOUND -->
                 <div id="tab-outbound" class="tab-content space-y-6 hidden">
                     <div class="max-w-3xl mx-auto space-y-6">
                         <h2 class="text-2xl font-bold text-slate-800">จ่ายถังออก (Outbound)</h2>
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <div class="flex border-b border-slate-200">
-                                <button type="button" onclick="setOutboundMode('filling')" id="btn-mode-filling" class="flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600">ส่งไปบรรจุ (Filling)</button>
-                                <button type="button" onclick="setOutboundMode('disposal')" id="btn-mode-disposal" class="flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50">จำหน่าย/ทิ้ง (Disposal)</button>
+                                <button type="button" onclick="setOutboundMode('filling')" id="btn-mode-filling" class="flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600">ส่งบรรจุ</button>
+                                <button type="button" onclick="setOutboundMode('disposal')" id="btn-mode-disposal" class="flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50">จำหน่าย</button>
                             </div>
                             <form id="outbound-form" onsubmit="handleOutboundSubmit(event)" class="p-6 space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,11 +209,10 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: INVENTORY -->
                 <div id="tab-inventory" class="tab-content space-y-6 hidden">
                     <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-bold text-slate-800">คงเหลือ (Inventory Balance)</h2>
-                        <button onclick="exportInventoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium border border-green-300">
+                        <button onclick="exportInventoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium">
                             <i data-lucide="download" class="w-4 h-4"></i> Export CSV
                         </button>
                     </div>
@@ -239,19 +229,16 @@
                                         <th class="p-4 font-semibold text-center">สถานะพื้นที่</th>
                                     </tr>
                                 </thead>
-                                <tbody id="inventory-table-body" class="divide-y divide-slate-100">
-                                    <!-- Dynamic Rows -->
-                                </tbody>
+                                <tbody id="inventory-table-body" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 5: HISTORY -->
                 <div id="tab-history" class="tab-content space-y-6 hidden">
                     <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-bold text-slate-800">ประวัติการทำรายการ (History)</h2>
-                        <button onclick="exportHistoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium border border-green-300">
+                        <button onclick="exportHistoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium">
                             <i data-lucide="download" class="w-4 h-4"></i> Export CSV
                         </button>
                     </div>
@@ -259,7 +246,7 @@
                         <div class="p-4 bg-slate-50 border-b border-slate-200 flex gap-4">
                             <div class="relative flex-1 max-w-md">
                                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
-                                <input type="text" id="history-search" oninput="renderHistory()" placeholder="ค้นหารายการ..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <input type="text" id="history-search" oninput="renderHistory()" placeholder="ค้นหารายการ..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <select id="history-filter" onchange="renderHistory()" class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700">
                                 <option value="all">ทุกประเภทรายการ</option>
@@ -280,15 +267,12 @@
                                         <th class="p-3 font-semibold text-center">จัดการ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="history-table-body" class="divide-y divide-slate-100">
-                                    <!-- Dynamic Rows -->
-                                </tbody>
+                                <tbody id="history-table-body" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 6: SETTINGS (ADMIN) -->
                 <div id="tab-settings" class="tab-content space-y-6 hidden">
                     <div class="max-w-4xl mx-auto space-y-6">
                         <h2 class="text-2xl font-bold text-slate-800">จัดการประเภทถัง (Admin Settings)</h2>
@@ -317,18 +301,14 @@
 
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                             <h3 class="text-lg font-semibold text-slate-700 mb-4 border-b pb-2">รายการประเภทถังในระบบ</h3>
-                            <div id="settings-drum-list" class="space-y-3">
-                                <!-- Dynamic Items -->
-                            </div>
+                            <div id="settings-drum-list" class="space-y-3"></div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
 
-    <!-- Edit Transaction Modal -->
     <div id="edit-modal" class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
@@ -359,7 +339,6 @@
         </div>
     </div>
 
-    <!-- QR Modal -->
     <div id="qr-modal" class="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden text-center">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
@@ -374,11 +353,9 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
-        // State Management
         let drumTypes = [
             { id: 'dt1', name: 'ถังคลอรีน', capacity: 700, color: '#3b82f6' },
             { id: 'dt2', name: 'ถังโซดาไฟ', capacity: 500, color: '#8b5cf6' },
@@ -393,12 +370,10 @@
         let lineChartInstance = null;
         const prevOccupancyMap = {};
 
-        // Helper: Generate Unique ID
         function generateId(prefix = 'id') {
             return prefix + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
 
-        // Helper: Escape HTML to Prevent XSS
         function escapeHTML(str) {
             if (str === null || str === undefined) return '';
             return String(str)
@@ -409,50 +384,38 @@
                 .replace(/'/g, '&#039;');
         }
 
-        // Initialization on Load
-        window.onload = function() {
-            lucide.createIcons();
-            const inDateEl = document.getElementById('in-date');
-            const outDateEl = document.getElementById('out-date');
-            if (inDateEl) inDateEl.valueAsDate = new Date();
-            if (outDateEl) outDateEl.valueAsDate = new Date();
-
-            loadState();
-            checkURLParams();
-            renderAll();
-        };
-
-        // Backup State to LocalStorage
         function saveState() {
             try {
                 localStorage.setItem('drum_types', JSON.stringify(drumTypes));
                 localStorage.setItem('drum_transactions', JSON.stringify(transactions));
-            } catch (err) {
-                console.error("Failed to save state:", err);
+            } catch (error) {
+                console.error('Failed to save state:', error);
             }
         }
 
-        // Load State from LocalStorage with fallback & validation
         function loadState() {
             try {
                 const savedTypes = localStorage.getItem('drum_types');
                 const savedTx = localStorage.getItem('drum_transactions');
+
                 if (savedTypes) {
                     const parsedTypes = JSON.parse(savedTypes);
                     if (Array.isArray(parsedTypes)) drumTypes = parsedTypes;
                 }
+
                 if (savedTx) {
                     const parsedTx = JSON.parse(savedTx);
                     if (Array.isArray(parsedTx)) transactions = parsedTx;
                 }
-            } catch (err) {
-                console.error("Failed to load state, using defaults:", err);
+            } catch (error) {
+                console.error('Failed to load state, using defaults:', error);
             }
         }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             if (!container) return;
+
             const toast = document.createElement('div');
             const bgColor = type === 'error' ? 'bg-red-600' : type === 'warning' ? 'bg-orange-500' : 'bg-green-600';
             toast.className = `flex items-center gap-3 px-5 py-4 rounded-lg shadow-xl text-white ${bgColor} transition-all transform translate-y-2 opacity-0`;
@@ -460,7 +423,7 @@
             container.appendChild(toast);
             lucide.createIcons();
 
-            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 50);
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 50);
             setTimeout(() => {
                 toast.classList.add('opacity-0');
                 setTimeout(() => toast.remove(), 300);
@@ -481,16 +444,17 @@
                 btn.classList.remove('bg-blue-600', 'text-white');
                 btn.classList.add('hover:bg-slate-800', 'hover:text-white', 'text-slate-300');
             });
+
             const activeBtn = document.querySelector(`.nav-btn[data-target="${tabId}"]`);
             if (activeBtn) {
                 activeBtn.classList.add('bg-blue-600', 'text-white');
                 activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
             }
+
             if (window.innerWidth < 768) toggleSidebar();
             if (tabId === 'dashboard') updateCharts();
         }
 
-        // URL Params QR Check
         function checkURLParams() {
             const params = new URLSearchParams(window.location.search);
             const action = params.get('action');
@@ -503,6 +467,7 @@
                 setTimeout(() => {
                     const drumSelect = document.getElementById('in-drum-type');
                     if (drumSelect) drumSelect.value = drumId;
+
                     if (supplier) {
                         const supSelect = document.getElementById('in-supplier');
                         if (supSelect) {
@@ -510,6 +475,7 @@
                             toggleSupplierOther(supplier);
                         }
                     }
+
                     if (location) {
                         const locSelect = document.getElementById('in-location');
                         if (locSelect) {
@@ -517,26 +483,30 @@
                             toggleLocationOther(location);
                         }
                     }
+
                     showToast('สแกน QR สำเร็จ! พร้อมบันทึกรับเข้า', 'success');
                 }, 300);
             }
         }
 
-        // Calculations & Inventory Status
         function getInventoryStatus() {
             return drumTypes.map(drum => {
                 const typeTx = transactions.filter(t => t.drumTypeId === drum.id);
                 const qtyIn = typeTx.filter(t => t.type === 'IN').reduce((sum, t) => sum + t.qty, 0);
                 const qtyOutFill = typeTx.filter(t => t.type === 'OUT_FILL').reduce((sum, t) => sum + t.qty, 0);
                 const qtyOutDispose = typeTx.filter(t => t.type === 'OUT_DISPOSE').reduce((sum, t) => sum + t.qty, 0);
-                
+
                 const balance = qtyIn - qtyOutFill - qtyOutDispose;
                 const occupancy = drum.capacity > 0 ? Number((Math.max(0, balance / drum.capacity) * 100).toFixed(1)) : 0;
-                
+
                 let alert = { level: 'NORMAL', label: 'Normal', color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-200', bar: 'bg-green-500' };
-                if (occupancy >= 100) alert = { level: 'FULL', label: 'Storage Full', color: 'text-red-700', bg: 'bg-red-100', border: 'border-red-500', bar: 'bg-red-500' };
-                else if (occupancy >= 90) alert = { level: 'ALMOST', label: 'Capacity Almost Full', color: 'text-orange-700', bg: 'bg-orange-100', border: 'border-orange-500', bar: 'bg-orange-500' };
-                else if (occupancy >= 80) alert = { level: 'NEAR', label: 'Storage Near Full', color: 'text-yellow-700', bg: 'bg-yellow-100', border: 'border-yellow-500', bar: 'bg-yellow-500' };
+                if (occupancy >= 100) {
+                    alert = { level: 'FULL', label: 'Storage Full', color: 'text-red-700', bg: 'bg-red-100', border: 'border-red-500', bar: 'bg-red-500' };
+                } else if (occupancy >= 90) {
+                    alert = { level: 'ALMOST', label: 'Capacity Almost Full', color: 'text-orange-700', bg: 'bg-orange-100', border: 'border-orange-500', bar: 'bg-orange-500' };
+                } else if (occupancy >= 80) {
+                    alert = { level: 'NEAR', label: 'Storage Near Full', color: 'text-yellow-700', bg: 'bg-yellow-100', border: 'border-yellow-500', bar: 'bg-yellow-500' };
+                }
 
                 return { ...drum, qtyIn, qtyOutFill, qtyOutDispose, balance, occupancy, alert };
             });
@@ -554,7 +524,6 @@
             });
         }
 
-        // Render All Views
         function renderAll() {
             const statusList = getInventoryStatus();
             checkCapacityAlerts(statusList);
@@ -570,24 +539,24 @@
             const inSelect = document.getElementById('in-drum-type');
             const outSelect = document.getElementById('out-drum-type');
             if (!inSelect || !outSelect) return;
-            
+
             let inOpts = '<option value="">-- เลือกประเภทถัง --</option>';
             let outOpts = '<option value="">-- เลือกประเภทถัง --</option>';
-            
+
             statusList.forEach(d => {
                 const availableSpace = Math.max(0, d.capacity - d.balance);
                 inOpts += `<option value="${escapeHTML(d.id)}">${escapeHTML(d.name)} (ว่าง ${availableSpace} ใบ)</option>`;
                 outOpts += `<option value="${escapeHTML(d.id)}">${escapeHTML(d.name)} (มีในสต๊อก ${d.balance} ใบ)</option>`;
             });
-            
+
             inSelect.innerHTML = inOpts;
             outSelect.innerHTML = outOpts;
         }
 
-        // Render Dashboard
         function renderDashboard(statusList) {
             const container = document.getElementById('dashboard-cards');
             if (!container) return;
+
             container.innerHTML = statusList.map(drum => `
                 <div class="bg-white rounded-xl shadow-sm border-l-4 p-4 ${escapeHTML(drum.alert.border)}">
                     <div class="flex justify-between items-start">
@@ -617,11 +586,9 @@
             lucide.createIcons();
         }
 
-        // Charts Update with context safety check
         function updateCharts() {
             const statusList = getInventoryStatus();
-            
-            // Bar Chart
+
             const barCanvas = document.getElementById('barChart');
             if (barCanvas) {
                 const barCtx = barCanvas.getContext('2d');
@@ -641,7 +608,6 @@
                 }
             }
 
-            // Line Chart Trend
             const trendMap = {};
             transactions.forEach(t => {
                 if (!trendMap[t.date]) trendMap[t.date] = { inbound: 0, outbound: 0 };
@@ -649,7 +615,7 @@
                 else trendMap[t.date].outbound += t.qty;
             });
             const sortedDates = Object.keys(trendMap).sort();
-            
+
             const lineCanvas = document.getElementById('lineChart');
             if (lineCanvas) {
                 const lineCtx = lineCanvas.getContext('2d');
@@ -670,7 +636,6 @@
             }
         }
 
-        // Form Toggles & Handlers
         function toggleSupplierOther(val) {
             const otherInput = document.getElementById('in-other-supplier');
             if (!otherInput) return;
@@ -705,9 +670,9 @@
 
             const supplierVal = document.getElementById('in-supplier').value;
             const supplier = supplierVal === 'Other' ? document.getElementById('in-other-supplier').value : supplierVal;
-            
+
             const locationVal = document.getElementById('in-location').value;
-            const location = locationVal === 'อื่นๆ' ? document.getElementById('in-other-location').value : locationVal;
+            const location = locationVal === 'อื่��ๆ' ? document.getElementById('in-other-location').value : locationVal;
 
             const newTx = {
                 id: generateId('tx'),
@@ -724,10 +689,12 @@
             transactions.push(newTx);
             saveState();
             renderAll();
+
             const form = document.getElementById('inbound-form');
             if (form) form.reset();
             const dateEl = document.getElementById('in-date');
             if (dateEl) dateEl.valueAsDate = new Date();
+
             showToast('บันทึกรับถังเข้าสำเร็จ', 'success');
         }
 
@@ -740,23 +707,33 @@
             const submitBtn = document.getElementById('outbound-submit-btn');
 
             if (mode === 'filling') {
-                if (btnFill) btnFill.className = "flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600";
-                if (btnDisp) btnDisp.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
-                if (f1Label) f1Label.innerText = "ผู้เบิก";
+                if (btnFill) btnFill.className = 'flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600';
+                if (btnDisp) btnDisp.className = 'flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50';
+                if (f1Label) f1Label.innerText = 'ผู้เบิก';
                 const f1Input = document.getElementById('out-field-1');
-                if (f1Input) f1Input.placeholder = "";
-                if (f2Container) f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">หน่วยงาน/แผนก</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
+                if (f1Input) f1Input.placeholder = '';
+                if (f2Container) {
+                    f2Container.innerHTML = `
+                        <label class="block text-sm font-medium text-slate-700 mb-1">หน่วยงาน/แผนก</label>
+                        <input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    `;
+                }
                 if (submitBtn) {
-                    submitBtn.className = "px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2";
+                    submitBtn.className = 'px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2';
                     submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกส่งบรรจุ';
                 }
             } else {
-                if (btnDisp) btnDisp.className = "flex-1 py-3 text-center font-medium bg-red-50 text-red-700 border-b-2 border-red-600";
-                if (btnFill) btnFill.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
-                if (f1Label) f1Label.innerText = "ผู้อนุมัติ";
-                if (f2Container) f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">เหตุผลการจำหน่าย</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
+                if (btnDisp) btnDisp.className = 'flex-1 py-3 text-center font-medium bg-red-50 text-red-700 border-b-2 border-red-600';
+                if (btnFill) btnFill.className = 'flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50';
+                if (f1Label) f1Label.innerText = 'ผู้อนุมัติ';
+                if (f2Container) {
+                    f2Container.innerHTML = `
+                        <label class="block text-sm font-medium text-slate-700 mb-1">เหตุผลการจำหน่าย</label>
+                        <input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    `;
+                }
                 if (submitBtn) {
-                    submitBtn.className = "px-6 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center gap-2";
+                    submitBtn.className = 'px-6 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center gap-2';
                     submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกจำหน่าย';
                 }
             }
@@ -795,17 +772,19 @@
             transactions.push(newTx);
             saveState();
             renderAll();
+
             const form = document.getElementById('outbound-form');
             if (form) form.reset();
             const dateEl = document.getElementById('out-date');
             if (dateEl) dateEl.valueAsDate = new Date();
+
             showToast('บันทึกจ่ายถังออกสำเร็จ', 'success');
         }
 
-        // Render Inventory Table
         function renderInventory(statusList) {
             const tbody = document.getElementById('inventory-table-body');
             if (!tbody) return;
+
             tbody.innerHTML = statusList.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="p-4 font-medium text-slate-900">${escapeHTML(item.name)}</td>
@@ -827,7 +806,6 @@
             `).join('');
         }
 
-        // Render History Table & Actions
         function renderHistory() {
             const tbody = document.getElementById('history-table-body');
             const searchEl = document.getElementById('history-search');
@@ -839,23 +817,28 @@
 
             let filtered = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
             if (filter !== 'all') filtered = filtered.filter(t => t.type === filter);
+
             if (search) {
                 filtered = filtered.filter(t => {
                     const drum = drumTypes.find(d => d.id === t.drumTypeId)?.name || '';
                     const detail = `${t.receiver || ''} ${t.supplier || ''} ${t.location || ''} ${t.remark || ''} ${t.requester || ''} ${t.department || ''} ${t.approver || ''} ${t.reason || ''}`.toLowerCase();
-                    return drum.toLowerCase().includes(search) || detail.includes(search) || t.date.includes(search);
+                    return drum.toLowerCase().includes(search) || detail.includes(search) || (t.date || '').includes(search);
                 });
             }
 
             tbody.innerHTML = filtered.map(tx => {
                 const drumName = drumTypes.find(d => d.id === tx.drumTypeId)?.name || 'Unknown';
-                let label = 'รับเข้า', style = 'text-green-700 bg-green-50 border-green-200';
+                let label = 'รับเข้า';
+                let style = 'text-green-700 bg-green-50 border-green-200';
                 let detail = `ผู้รับ: ${escapeHTML(tx.receiver || '')} | จาก: ${escapeHTML(tx.supplier || '')} | โซน: ${escapeHTML(tx.location || '')}`;
+
                 if (tx.type === 'OUT_FILL') {
-                    label = 'ส่งบรรจุ'; style = 'text-blue-700 bg-blue-50 border-blue-200';
+                    label = 'ส่งบรรจุ';
+                    style = 'text-blue-700 bg-blue-50 border-blue-200';
                     detail = `ผู้เบิก: ${escapeHTML(tx.requester || '')} | แผนก: ${escapeHTML(tx.department || '')}`;
                 } else if (tx.type === 'OUT_DISPOSE') {
-                    label = 'จำหน่าย'; style = 'text-red-700 bg-red-50 border-red-200';
+                    label = 'จำหน่าย';
+                    style = 'text-red-700 bg-red-50 border-red-200';
                     detail = `ผู้อนุมัติ: ${escapeHTML(tx.approver || '')} | เหตุผล: ${escapeHTML(tx.reason || '')}`;
                 }
 
@@ -875,6 +858,7 @@
                     </tr>
                 `;
             }).join('');
+
             lucide.createIcons();
         }
 
@@ -890,6 +874,7 @@
         function openEditModal(id) {
             const tx = transactions.find(t => t.id === id);
             if (!tx) return;
+
             const editId = document.getElementById('edit-id');
             const editDate = document.getElementById('edit-date');
             const editQty = document.getElementById('edit-qty');
@@ -924,11 +909,9 @@
                 return;
             }
 
-            // Test if edit causes negative stock balance
             const testTransactions = [...transactions];
             testTransactions[txIndex] = { ...originalTx, date: newDate, qty: newQty };
-            
-            // Check all drum types validity under testTransactions
+
             for (let drum of drumTypes) {
                 const typeTxs = testTransactions.filter(t => t.drumTypeId === drum.id);
                 const qIn = typeTxs.filter(t => t.type === 'IN').reduce((s, t) => s + t.qty, 0);
@@ -955,10 +938,10 @@
             showToast('แก้ไขข้อมูลสำเร็จ', 'success');
         }
 
-        // Settings (Admin)
         function renderSettings() {
             const container = document.getElementById('settings-drum-list');
             if (!container) return;
+
             container.innerHTML = drumTypes.map(drum => `
                 <div class="flex items-center justify-between p-4 border border-slate-200 rounded-lg bg-slate-50 gap-4">
                     <div class="flex items-center gap-4">
@@ -969,8 +952,8 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button type="button" onclick="showQR('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-md" title="QR Code"><i data-lucide="qr-code" class="w-5 h-5"></i></button>
-                        <button type="button" onclick="deleteDrumType('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md" title="ลบ"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        <button type="button" onclick="showQR('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-md" title="QR Code"><i data-lucide="qr-code" class="w-4 h-4"></i></button>
+                        <button type="button" onclick="deleteDrumType('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md" title="ลบ"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -979,16 +962,22 @@
 
         function handleAddDrumType(e) {
             e.preventDefault();
+
             const nameEl = document.getElementById('new-drum-name');
             const capEl = document.getElementById('new-drum-capacity');
             const colorEl = document.getElementById('new-drum-color');
             if (!nameEl || !capEl || !colorEl) return;
 
-            const name = nameEl.value;
+            const name = nameEl.value.trim();
             const capacity = Number(capEl.value);
             const color = colorEl.value;
-            const newId = generateId('dt');
 
+            if (!name || !capacity || capacity <= 0) {
+                showToast('กรุณากรอกข้อมูลประเภทถังให้ครบถ้วน', 'error');
+                return;
+            }
+
+            const newId = generateId('dt');
             drumTypes.push({ id: newId, name, capacity, color });
             saveState();
             renderAll();
@@ -998,10 +987,11 @@
 
         function deleteDrumType(id) {
             if (transactions.some(t => t.drumTypeId === id)) {
-                showToast('ไม่สามารถลบได้ เนื่องจากมีประวัติการทำรายการแล้ว', 'error');
+                showToast('ไม่สามารถลบประเภทถังที่มีประวัติการใช้งานได้', 'error');
                 return;
             }
-            if (confirm('ยืนยันการลบประเภทถังนี้?')) {
+
+            if (confirm('คุณต้องการลบประเภทถังนี้ใช่หรือไม่?')) {
                 drumTypes = drumTypes.filter(d => d.id !== id);
                 saveState();
                 renderAll();
@@ -1009,21 +999,21 @@
             }
         }
 
-        function showQR(id) {
-            const drum = drumTypes.find(d => d.id === id);
+        function showQR(drumId) {
+            const drum = drumTypes.find(d => d.id === drumId);
             if (!drum) return;
-            const titleEl = document.getElementById('qr-modal-title');
-            const container = document.getElementById('qr-image-container');
-            const modal = document.getElementById('qr-modal');
 
-            if (titleEl) titleEl.innerText = drum.name;
-            const targetUrl = `${window.location.origin}${window.location.pathname}?action=inbound&drumId=${encodeURIComponent(drum.id)}&supplier=VSC&location=ล็อค 1`;
-            if (container) {
-                container.innerHTML = `
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}" class="w-48 h-48 mx-auto" alt="QR">
-                `;
-            }
-            if (modal) modal.classList.remove('hidden');
+            const modal = document.getElementById('qr-modal');
+            const title = document.getElementById('qr-modal-title');
+            const qrContainer = document.getElementById('qr-image-container');
+
+            if (!modal || !title || !qrContainer) return;
+
+            title.textContent = drum.name;
+            const qrData = `${window.location.origin}${window.location.pathname}?action=inbound&drumId=${encodeURIComponent(drum.id)}`;
+            const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}`;
+            qrContainer.innerHTML = `<img src="${qrURL}" alt="QR Code" class="w-48 h-48 rounded-lg">`;
+            modal.classList.remove('hidden');
         }
 
         function closeQRModal() {
@@ -1031,35 +1021,63 @@
             if (modal) modal.classList.add('hidden');
         }
 
-        // CSV Exports
         function exportInventoryCSV() {
             const statusList = getInventoryStatus();
-            const headers = ["ประเภทถัง", "รับเข้ารวม", "ส่งบรรจุ", "จำหน่าย", "คงเหลือ", "ความจุ", "เปอร์เซ็นต์การใช้งาน"];
-            const rows = statusList.map(i => [i.name, i.qtyIn, i.qtyOutFill, i.qtyOutDispose, i.balance, i.capacity, i.occupancy + "%"]);
-            downloadCSV("inventory_" + new Date().toISOString().slice(0,10) + ".csv", [headers, ...rows]);
-            showToast("Export CSV สำเร็จ");
+            const rows = [
+                ['ประเภทถัง', 'รับเข้ารวม', 'ส่งบรรจุ', 'จำหน่าย', 'คงเหลือสุทธิ', 'สถานะพื้นที่'],
+                ...statusList.map(d => [d.name, d.qtyIn, d.qtyOutFill, d.qtyOutDispose, d.balance, `${d.occupancy}%`])
+            ];
+
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'inventory.csv';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         function exportHistoryCSV() {
-            const headers = ["วันที่", "ประเภทรายการ", "ประเภทถัง", "จำนวน", "รายละเอียด"];
-            const rows = transactions.map(t => {
-                const drumName = drumTypes.find(d => d.id === t.drumTypeId)?.name || "";
-                let detail = t.type === 'IN' ? `${t.receiver} - ${t.supplier} (${t.location || ''})` : t.type === 'OUT_FILL' ? `${t.requester} - ${t.department}` : `${t.approver} - ${t.reason}`;
-                return [t.date, t.type, drumName, t.qty, `"${detail}"`];
+            const rows = [
+                ['วันที่', 'ประเภทรายการ', 'ประเภทถัง', 'จำนวน', 'รายละเอียด']
+            ];
+
+            transactions.forEach(tx => {
+                const drumName = drumTypes.find(d => d.id === tx.drumTypeId)?.name || 'Unknown';
+                let typeLabel = 'รับเข้า';
+                let detail = `${tx.receiver || ''} | ${tx.supplier || ''} | ${tx.location || ''}`;
+                if (tx.type === 'OUT_FILL') {
+                    typeLabel = 'ส่งบรรจุ';
+                    detail = `${tx.requester || ''} | ${tx.department || ''}`;
+                } else if (tx.type === 'OUT_DISPOSE') {
+                    typeLabel = 'จำหน่าย';
+                    detail = `${tx.approver || ''} | ${tx.reason || ''}`;
+                }
+                rows.push([tx.date, typeLabel, drumName, tx.qty, detail]);
             });
-            downloadCSV("history_" + Date.now() + ".csv", [headers, ...rows]);
-            showToast("Export History CSV สำเร็จ");
+
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'history.csv';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
-        function downloadCSV(filename, rows) {
-            const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(link.href);
-        }
+        window.onload = function() {
+            lucide.createIcons();
+            const inDateEl = document.getElementById('in-date');
+            const outDateEl = document.getElementById('out-date');
+            if (inDateEl) inDateEl.valueAsDate = new Date();
+            if (outDateEl) outDateEl.valueAsDate = new Date();
+
+            loadState();
+            checkURLParams();
+            renderAll();
+        };
     </script>
 </body>
 </html>

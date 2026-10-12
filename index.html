@@ -12,8 +12,14 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTML5 QR Code Scanner -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; }
+        /* QR Code Scanner styling overrides */
+        #qr-reader { border: none !important; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); }
+        #qr-reader__scan_region { background-color: #f8fafc; }
     </style>
 </head>
 <body class="bg-slate-100 h-screen flex overflow-hidden">
@@ -23,44 +29,44 @@
             <span class="text-xl font-bold text-white flex items-center gap-2">
                 <i data-lucide="package" class="text-blue-400"></i> DrumSys
             </span>
-            <button class="md:hidden text-slate-300" onclick="toggleSidebar()">
+            <button class="md:hidden text-slate-300" onclick="window.toggleSidebar()">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
         <nav class="flex-1 overflow-y-auto py-4">
             <ul class="space-y-1 px-2">
                 <li>
-                    <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-blue-600 text-white" data-target="dashboard">
+                    <button onclick="window.switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-blue-600 text-white" data-target="dashboard">
                         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                         <span>Dashboard</span>
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('inbound')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="inbound">
+                    <button onclick="window.switchTab('inbound')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="inbound">
                         <i data-lucide="arrow-down-to-line" class="w-5 h-5"></i>
                         <span>รับถังเข้า (Inbound)</span>
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('outbound')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="outbound">
+                    <button onclick="window.switchTab('outbound')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="outbound">
                         <i data-lucide="arrow-up-from-line" class="w-5 h-5"></i>
                         <span>จ่ายถังออก (Outbound)</span>
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('inventory')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="inventory">
+                    <button onclick="window.switchTab('inventory')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="inventory">
                         <i data-lucide="package" class="w-5 h-5"></i>
                         <span>สต๊อกคงเหลือ</span>
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('history')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="history">
+                    <button onclick="window.switchTab('history')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="history">
                         <i data-lucide="history" class="w-5 h-5"></i>
                         <span>ประวัติ (History)</span>
                     </button>
                 </li>
                 <li>
-                    <button onclick="switchTab('settings')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="settings">
+                    <button onclick="window.switchTab('settings')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white text-slate-300" data-target="settings">
                         <i data-lucide="settings" class="w-5 h-5"></i>
                         <span>ตั้งค่า (Admin)</span>
                     </button>
@@ -68,22 +74,27 @@
             </ul>
         </nav>
         <div class="p-4 bg-slate-950 text-xs text-slate-500 text-center">
-            v2.1.0 Empty Drum System (HTML)
+            v3.0.0 Realtime Cloud Edition
         </div>
     </div>
 
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header class="md:hidden bg-white border-b border-slate-200 p-4 flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="text-slate-600 hover:text-slate-900">
+            <button onclick="window.toggleSidebar()" class="text-slate-600 hover:text-slate-900">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             <h1 class="font-bold text-lg text-slate-800">Drum Management</h1>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 relative">
+            
+            <!-- Connection Status -->
+            <div id="connection-status" class="hidden absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-100 text-yellow-800 px-4 py-1 rounded-b-lg text-sm font-medium shadow-sm flex items-center gap-2">
+                <i data-lucide="refresh-cw" class="w-4 h-4 animate-spin"></i> กำลังซิงค์ข้อมูล Cloud...
+            </div>
+
             <div class="max-w-7xl mx-auto">
                 
-                <!-- TAB 1: DASHBOARD -->
                 <div id="tab-dashboard" class="tab-content space-y-6">
                     <h2 class="text-2xl font-bold text-slate-800">Dashboard</h2>
                     <div id="dashboard-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -105,15 +116,28 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: INBOUND -->
                 <div id="tab-inbound" class="tab-content space-y-6 hidden">
                     <div class="max-w-3xl mx-auto space-y-6">
                         <h2 class="text-2xl font-bold text-slate-800">รับถังเปล่า (Inbound)</h2>
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                            <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                            <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                                 <h3 class="font-semibold text-slate-700">ฟอร์มบันทึกรับเข้า</h3>
+                                <button type="button" onclick="window.startScanner()" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
+                                    <i data-lucide="camera" class="w-4 h-4"></i> สแกน QR Code
+                                </button>
                             </div>
-                            <form id="inbound-form" onsubmit="handleInboundSubmit(event)" class="p-6 space-y-4">
+                            
+                            <!-- Scanner Region -->
+                            <div id="scanner-container" class="hidden p-4 bg-slate-100 border-b border-slate-200">
+                                <div id="qr-reader" class="w-full max-w-sm mx-auto"></div>
+                                <div class="text-center mt-3">
+                                    <button type="button" onclick="window.stopScanner()" class="text-sm text-red-600 font-medium bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100">
+                                        ปิดกล้องสแกน
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form id="inbound-form" onsubmit="window.handleInboundSubmit(event)" class="p-6 space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">วันที่รับ</label>
@@ -125,7 +149,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">บริษัทผู้ส่ง (Supplier)</label>
-                                        <select id="in-supplier" required onchange="toggleSupplierOther(this.value)" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <select id="in-supplier" required onchange="window.toggleSupplierOther(this.value)" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             <option value="">-- เลือกบริษัทผู้ส่ง --</option>
                                             <option value="VSC">VSC</option>
                                             <option value="VSST">VSST</option>
@@ -136,7 +160,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">ตำแหน่งจัดเก็บ (Location)</label>
-                                        <select id="in-location" required onchange="toggleLocationOther(this.value)" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <select id="in-location" required onchange="window.toggleLocationOther(this.value)" class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             <option value="ล็อค 1">ล็อค 1</option>
                                             <option value="ล็อค 2">ล็อค 2</option>
                                             <option value="ล็อค 3">ล็อค 3</option>
@@ -174,16 +198,15 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: OUTBOUND -->
                 <div id="tab-outbound" class="tab-content space-y-6 hidden">
                     <div class="max-w-3xl mx-auto space-y-6">
                         <h2 class="text-2xl font-bold text-slate-800">จ่ายถังออก (Outbound)</h2>
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <div class="flex border-b border-slate-200">
-                                <button type="button" onclick="setOutboundMode('filling')" id="btn-mode-filling" class="flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600">ส่งไปบรรจุ (Filling)</button>
-                                <button type="button" onclick="setOutboundMode('disposal')" id="btn-mode-disposal" class="flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50">จำหน่าย/ทิ้ง (Disposal)</button>
+                                <button type="button" onclick="window.setOutboundMode('filling')" id="btn-mode-filling" class="flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600">ส่งไปบรรจุ (Filling)</button>
+                                <button type="button" onclick="window.setOutboundMode('disposal')" id="btn-mode-disposal" class="flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50">จำหน่าย/ทิ้ง (Disposal)</button>
                             </div>
-                            <form id="outbound-form" onsubmit="handleOutboundSubmit(event)" class="p-6 space-y-4">
+                            <form id="outbound-form" onsubmit="window.handleOutboundSubmit(event)" class="p-6 space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-slate-700 mb-1">วันที่จ่าย</label>
@@ -218,11 +241,10 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: INVENTORY -->
                 <div id="tab-inventory" class="tab-content space-y-6 hidden">
                     <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-bold text-slate-800">คงเหลือ (Inventory Balance)</h2>
-                        <button onclick="exportInventoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium border border-green-300">
+                        <button onclick="window.exportInventoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium border border-green-300">
                             <i data-lucide="download" class="w-4 h-4"></i> Export CSV
                         </button>
                     </div>
@@ -247,11 +269,10 @@
                     </div>
                 </div>
 
-                <!-- TAB 5: HISTORY -->
                 <div id="tab-history" class="tab-content space-y-6 hidden">
                     <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-bold text-slate-800">ประวัติการทำรายการ (History)</h2>
-                        <button onclick="exportHistoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium border border-green-300">
+                        <button onclick="window.exportHistoryCSV()" class="flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors text-sm font-medium border border-green-300">
                             <i data-lucide="download" class="w-4 h-4"></i> Export CSV
                         </button>
                     </div>
@@ -259,9 +280,9 @@
                         <div class="p-4 bg-slate-50 border-b border-slate-200 flex gap-4">
                             <div class="relative flex-1 max-w-md">
                                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
-                                <input type="text" id="history-search" oninput="renderHistory()" placeholder="ค้นหารายการ..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <input type="text" id="history-search" oninput="window.renderHistory()" placeholder="ค้นหารายการ (ชื่อถัง, ผู้รับ-ส่ง, แผนก, หมายเหตุ)..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                             </div>
-                            <select id="history-filter" onchange="renderHistory()" class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700">
+                            <select id="history-filter" onchange="window.renderHistory()" class="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700">
                                 <option value="all">ทุกประเภทรายการ</option>
                                 <option value="IN">รับเข้า</option>
                                 <option value="OUT_FILL">ส่งบรรจุ</option>
@@ -288,28 +309,65 @@
                     </div>
                 </div>
 
-                <!-- TAB 6: SETTINGS (ADMIN) -->
                 <div id="tab-settings" class="tab-content space-y-6 hidden">
                     <div class="max-w-4xl mx-auto space-y-6">
-                        <h2 class="text-2xl font-bold text-slate-800">จัดการประเภทถัง (Admin Settings)</h2>
+                        <h2 class="text-2xl font-bold text-slate-800">จัดการประเภทถัง & ตั้งค่า (Admin Settings)</h2>
                         
                         <!-- System Settings for QR Code Base URL -->
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="text-lg font-semibold text-slate-700 mb-4 border-b pb-2">ตั้งค่าระบบ (สำหรับ QR Code)</h3>
+                            <h3 class="text-lg font-semibold text-slate-700 mb-4 border-b pb-2 flex items-center justify-between">
+                                <span>ตั้งค่าระบบ (Base URL สำหรับ QR Code)</span>
+                            </h3>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">URL ของระบบ (Base URL)</label>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">URL ของระบบ (ใช้อ้างอิงตอนสร้างรูป QR)</label>
                                 <div class="flex gap-2">
-                                    <input type="text" id="sys-base-url" placeholder="https://your-domain.com/ หรือ http://192.168.1.10:5500/" class="flex-1 rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <button type="button" onclick="saveBaseUrl()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition-colors">บันทึก URL</button>
+                                    <input type="text" id="sys-base-url" placeholder="เช่น http://192.168.1.10:5500/index.html" class="flex-1 rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <button type="button" onclick="window.saveBaseUrl()" class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition-colors">บันทึก URL</button>
                                 </div>
-                                <p class="text-xs text-red-500 mt-2">
-                                    * สำคัญ: หากเปิดจากไฟล์ในเครื่อง (file:///) มือถือจะไม่สามารถสแกนได้ คุณต้องระบุ IP เครื่องตัวเอง (เมื่อรัน Local Server) หรือระบุ URL ของเว็บไซต์จริง เพื่อให้ QR Code สร้าง Link ที่ถูกต้อง
+                                <p class="text-xs text-slate-500 mt-2">
+                                    * หากใช้งานในวง LAN ให้ระบุ IP เครื่อง (เช่น `http://192.168.1.x:5500/index.html`) หากเอาขึ้นเซิร์ฟเวอร์จริง ให้ใส่ URL เว็บไซต์จริง เพื่อให้มือถือสแกนและเปิดหน้าเว็บได้ถูกต้อง
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Google Sheets Setup Section -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <h3 class="text-lg font-semibold text-slate-700 mb-4 border-b pb-2">เชื่อมต่อฐานข้อมูล Google Sheets (Backup)</h3>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Web App URL (จาก Apps Script)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="sys-gsheet-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <button type="button" onclick="window.saveGSheetUrl()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">บันทึก URL</button>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">
+                                    * ระบบจะส่งข้อมูลไปเก็บบันทึกลงใน Google Sheet พร้อมกับการบันทึกลง Cloud Database หลัก (Firebase) อัตโนมัติ
                                 </p>
                             </div>
                         </div>
 
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                             <h3 class="text-lg font-semibold text-slate-700 mb-4 border-b pb-2">รายการประเภทถังในระบบ</h3>
+                            
+                            <form onsubmit="window.handleAddDrumType(event)" class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อประเภทถังใหม่</label>
+                                    <input type="text" id="new-drum-name" required placeholder="เช่น ถัง IBC" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">ความจุสูงสุด (ใบ)</label>
+                                    <input type="number" id="new-drum-capacity" required min="1" placeholder="จำนวนเต็ม" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">สีสัญลักษณ์</label>
+                                    <input type="color" id="new-drum-color" value="#3b82f6" required class="h-9 w-full p-1 bg-white border border-slate-300 rounded cursor-pointer">
+                                </div>
+                                <div>
+                                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm">
+                                        <i data-lucide="plus" class="w-4 h-4 inline-block mr-1"></i> เพิ่มประเภทถัง
+                                    </button>
+                                </div>
+                            </form>
+
                             <div id="settings-drum-list" class="space-y-3">
                                 <!-- Dynamic Items -->
                             </div>
@@ -326,27 +384,29 @@
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <h3 class="font-bold text-slate-800">แก้ไขรายการ</h3>
-                <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button type="button" onclick="window.closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <form id="edit-form" onsubmit="saveEditedTransaction(event)" class="p-6 space-y-4">
+            <form id="edit-form" onsubmit="window.saveEditedTransaction(event)" class="p-6 space-y-4">
                 <input type="hidden" id="edit-id">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">วันที่</label>
-                        <input type="date" id="edit-date" required class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                        <input type="date" id="edit-date" required class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">จำนวน (ใบ)</label>
-                        <input type="number" id="edit-qty" min="1" required class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                        <input type="number" id="edit-qty" min="1" required class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="col-span-2">
                         <label class="block text-sm font-medium text-slate-700 mb-1">รายละเอียด / หมายเหตุ</label>
-                        <input type="text" id="edit-remark" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                        <input type="text" id="edit-remark" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
-                <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">บันทึกการแก้ไข</button>
+                <div class="pt-4 mt-4 border-t border-slate-100 flex justify-end gap-3">
+                    <button type="button" onclick="window.closeEditModal()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> บันทึกการแก้ไข
+                    </button>
                 </div>
             </form>
         </div>
@@ -357,12 +417,15 @@
         <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden text-center">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <h3 class="font-bold text-slate-800">QR Code ประจำจุด</h3>
-                <button type="button" onclick="closeQRModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button type="button" onclick="window.closeQRModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-6 flex flex-col items-center">
                 <h4 id="qr-modal-title" class="text-lg font-bold text-slate-800 mb-4"></h4>
                 <div id="qr-image-container" class="bg-white p-2 border-4 border-slate-100 rounded-xl shadow-sm mb-4"></div>
-                <p class="text-sm text-slate-500 mt-2">สแกนเพื่อเปิดฟอร์มรับถังอัตโนมัติ</p>
+                <p class="text-sm text-slate-500 mt-2 mb-4">สแกนเพื่อเปิดฟอร์มรับถังอัตโนมัติ</p>
+                <button type="button" onclick="window.printQR()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    สั่งพิมพ์ (Print)
+                </button>
             </div>
         </div>
     </div>
@@ -370,35 +433,39 @@
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    <script>
-        // State Management
-        let drumTypes = [
-            { id: 'dt1', name: 'ถังคลอรีน', capacity: 700, color: '#3b82f6' },
-            { id: 'dt2', name: 'ถังโซดาไฟ', capacity: 500, color: '#8b5cf6' },
-            { id: 'dt3', name: 'ถัง200ลิตร', capacity: 300, color: '#ec4899' },
-            { id: 'dt4', name: 'ถังสีฟ้า', capacity: 400, color: '#0ea5e9' },
-            { id: 'dt5', name: 'ถังสีขาว', capacity: 400, color: '#94a3b8' }
-        ];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let transactions = [];
-        let outboundMode = 'filling';
-        let barChartInstance = null;
-        let lineChartInstance = null;
-        const prevOccupancyMap = {};
+        // === GLOBAL VARIABLES ===
+        window.drumTypes = [];
+        window.transactions = [];
+        window.outboundMode = 'filling';
+        window.barChartInstance = null;
+        window.lineChartInstance = null;
+        window.prevOccupancyMap = {};
+        window.appBaseUrl = window.location.origin + window.location.pathname;
+        window.gSheetUrl = "https://script.google.com/macros/s/AKfycbxjrJC6K9NUEFhGuO7pVZ8bIgpzrQz_bFPC3M3K5PO5gkMYoYh7GcuY7NhdKx7uLxcfIw/exec";
+        window.html5QrcodeScanner = null;
+        window.currentPrintQRUrl = "";
+
+        // === FIREBASE CONFIGURATION ===
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'drum-management-app';
+        let firebaseConfig = null;
+        try { firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null; } catch(e) {}
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        // System Settings
-        let appBaseUrl = window.location.origin + window.location.pathname;
+        let app, db, auth;
+        let isAuthReady = false;
 
-        // Helper: Generate Unique ID
-        function generateId(prefix = 'tx'){
-            if(window.crypto && crypto.randomUUID){
-                return `${prefix}_${crypto.randomUUID()}`;
-            }
+        // === UTILITIES ===
+        window.generateId = function(prefix = 'tx'){
+            if(window.crypto && crypto.randomUUID) return `${prefix}_${crypto.randomUUID()}`;
             return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2,9)}`;
         }
 
-        // Helper: Escape HTML to Prevent XSS
-        function escapeHTML(str = '') {
+        window.escapeHTML = function(str = '') {
             return String(str)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -407,80 +474,7 @@
                 .replace(/'/g, '&#39;');
         }
 
-        // Initialization on Load
-        window.onload = function() {
-            lucide.createIcons();
-            const inDateEl = document.getElementById('in-date');
-            const outDateEl = document.getElementById('out-date');
-            if (inDateEl) inDateEl.valueAsDate = new Date();
-            if (outDateEl) outDateEl.valueAsDate = new Date();
-
-            loadState();
-            checkURLParams();
-            renderAll();
-        };
-
-        // Backup State to LocalStorage
-        function saveState() {
-            try {
-                const backup = {
-                    drumTypes,
-                    transactions,
-                    backupDate: new Date().toISOString()
-                };
-                localStorage.setItem('drum_backup', JSON.stringify(backup));
-                localStorage.setItem('drum_types', JSON.stringify(drumTypes));
-                localStorage.setItem('drum_transactions', JSON.stringify(transactions));
-            } catch (err) {
-                console.error("Failed to save state:", err);
-            }
-        }
-
-        // Load State from LocalStorage with fallback & validation
-        function loadState() {
-            try {
-                const savedTypes = localStorage.getItem('drum_types');
-                const savedTx = localStorage.getItem('drum_transactions');
-                if (savedTypes) {
-                    const parsedTypes = JSON.parse(savedTypes);
-                    if (Array.isArray(parsedTypes)) drumTypes = parsedTypes;
-                }
-                if (savedTx) {
-                    const parsedTx = JSON.parse(savedTx);
-                    if (Array.isArray(parsedTx)) transactions = parsedTx;
-                }
-                
-                // Load Base URL
-                const savedBaseUrl = localStorage.getItem('drum_base_url');
-                if (savedBaseUrl) {
-                    appBaseUrl = savedBaseUrl;
-                }
-                const urlInput = document.getElementById('sys-base-url');
-                if (urlInput) urlInput.value = appBaseUrl;
-                
-            } catch (err) {
-                console.error(err);
-                localStorage.removeItem('drum_types');
-                localStorage.removeItem('drum_transactions');
-                showToast('พบข้อมูลเสียหาย ระบบรีเซ็ตใหม่', 'warning');
-            }
-        }
-
-        // Save Base URL
-        function saveBaseUrl() {
-            const urlInput = document.getElementById('sys-base-url');
-            if (!urlInput) return;
-            const newUrl = urlInput.value.trim();
-            if (!newUrl) {
-                showToast('โปรดระบุ URL ของระบบ', 'error');
-                return;
-            }
-            appBaseUrl = newUrl;
-            localStorage.setItem('drum_base_url', appBaseUrl);
-            showToast('บันทึก Base URL สำเร็จ', 'success');
-        }
-
-        function showToast(message, type = 'success') {
+        window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toast-container');
             if (!container) return;
             const toast = document.createElement('div');
@@ -497,65 +491,106 @@
             }, 3500);
         }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.classList.toggle('-translate-x-full');
+        // === INITIALIZATION & SYNC ===
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const inDateEl = document.getElementById('in-date');
+            const outDateEl = document.getElementById('out-date');
+            if (inDateEl) inDateEl.valueAsDate = new Date();
+            if (outDateEl) outDateEl.valueAsDate = new Date();
+
+            loadLocalSettings();
+            initCloudBackend();
+        });
+
+        function loadLocalSettings() {
+            const savedBaseUrl = localStorage.getItem('drum_base_url');
+            if (savedBaseUrl) window.appBaseUrl = savedBaseUrl;
+            const urlInput = document.getElementById('sys-base-url');
+            if (urlInput) urlInput.value = window.appBaseUrl;
+
+            const savedGSheetUrl = localStorage.getItem('drum_gsheet_url');
+            if (savedGSheetUrl) window.gSheetUrl = savedGSheetUrl;
+            const gSheetInput = document.getElementById('sys-gsheet-url');
+            if (gSheetInput) gSheetInput.value = window.gSheetUrl;
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            const targetTab = document.getElementById(`tab-${tabId}`);
-            if (targetTab) targetTab.classList.remove('hidden');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('hover:bg-slate-800', 'hover:text-white', 'text-slate-300');
-            });
-            const activeBtn = document.querySelector(`.nav-btn[data-target="${tabId}"]`);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-blue-600', 'text-white');
-                activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+        async function initCloudBackend() {
+            if (!firebaseConfig) {
+                window.showToast('⚠️ ไม่พบการตั้งค่า Database Cloud จำเป็นต้องรันผ่าน Platform เท่านั้น', 'warning');
+                return;
             }
-            if (window.innerWidth < 768) toggleSidebar();
-            if (tabId === 'dashboard') updateCharts();
-        }
+            try {
+                document.getElementById('connection-status').classList.remove('hidden');
+                
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
 
-        // URL Params QR Check
-        function checkURLParams() {
-            const params = new URLSearchParams(window.location.search);
-            const action = params.get('action');
-            const drumId = params.get('drumId');
-            const supplier = params.get('supplier');
-            const location = params.get('location');
-
-            if (action === 'inbound' && drumId) {
-                switchTab('inbound');
-                setTimeout(() => {
-                    const drumSelect = document.getElementById('in-drum-type');
-                    if (drumSelect) drumSelect.value = drumId;
-                    if (supplier) {
-                        const supSelect = document.getElementById('in-supplier');
-                        if (supSelect) {
-                            supSelect.value = supplier;
-                            toggleSupplierOther(supplier);
-                        }
-                    }
-                    if (location) {
-                        const locSelect = document.getElementById('in-location');
-                        if (locSelect) {
-                            locSelect.value = location;
-                            toggleLocationOther(location);
-                        }
-                    }
-                    showToast('สแกน QR สำเร็จ! พร้อมบันทึกรับเข้า', 'success');
-                }, 300);
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                isAuthReady = true;
+                startRealtimeSync();
+                document.getElementById('connection-status').classList.add('hidden');
+            } catch (err) {
+                console.error("Cloud init error:", err);
+                window.showToast('เชื่อมต่อฐานข้อมูลล้มเหลว', 'error');
             }
         }
 
-        // Calculations & Inventory Status
-        function getInventoryStatus() {
-            return drumTypes.map(drum => {
-                const typeTx = transactions.filter(t => t.drumTypeId === drum.id);
+        function startRealtimeSync() {
+            // Watch Drum Types
+            const drumRef = collection(db, 'artifacts', appId, 'public', 'data', 'drumTypes');
+            onSnapshot(drumRef, (snapshot) => {
+                const types = [];
+                snapshot.forEach(d => types.push({ id: d.id, ...d.data() }));
+                
+                if (types.length === 0) {
+                    // Seed defaults if totally empty
+                    const defaultDrums = [
+                        { id: 'dt1', name: 'ถังคลอรีน', capacity: 700, color: '#3b82f6' },
+                        { id: 'dt2', name: 'ถังโซดาไฟ', capacity: 500, color: '#8b5cf6' },
+                        { id: 'dt3', name: 'ถัง200ลิตร', capacity: 300, color: '#ec4899' },
+                        { id: 'dt4', name: 'ถังสีฟ้า', capacity: 400, color: '#0ea5e9' },
+                        { id: 'dt5', name: 'ถังสีขาว', capacity: 400, color: '#94a3b8' }
+                    ];
+                    defaultDrums.forEach(async (drum) => {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'drumTypes', drum.id), drum);
+                    });
+                } else {
+                    window.drumTypes = types;
+                    window.renderAll();
+                    checkURLParams(); // Ensure QR params process after data load
+                }
+            }, (error) => { console.error("DrumTypes Sync Error", error); });
+
+            // Watch Transactions
+            const txRef = collection(db, 'artifacts', appId, 'public', 'data', 'transactions');
+            onSnapshot(txRef, (snapshot) => {
+                const txs = [];
+                snapshot.forEach(d => txs.push({ id: d.id, ...d.data() }));
+                window.transactions = txs;
+                window.renderAll();
+            }, (error) => { console.error("Tx Sync Error", error); });
+        }
+
+        // === EXTERNAL INTEGRATION ===
+        window.sendToGoogleSheet = function(data) {
+            if (!window.gSheetUrl) return; 
+            fetch(window.gSheetUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(data)
+            }).catch(err => console.error('GSheet Sync Failed:', err));
+        }
+
+        // === CORE LOGIC & RENDERING ===
+        window.getInventoryStatus = function() {
+            return window.drumTypes.map(drum => {
+                const typeTx = window.transactions.filter(t => t.drumTypeId === drum.id);
                 const qtyIn = typeTx.filter(t => t.type === 'IN').reduce((sum, t) => sum + t.qty, 0);
                 const qtyOutFill = typeTx.filter(t => t.type === 'OUT_FILL').reduce((sum, t) => sum + t.qty, 0);
                 const qtyOutDispose = typeTx.filter(t => t.type === 'OUT_DISPOSE').reduce((sum, t) => sum + t.qty, 0);
@@ -572,28 +607,30 @@
             });
         }
 
-        function checkCapacityAlerts(statusList) {
-            statusList.forEach(drum => {
-                const prev = prevOccupancyMap[drum.id] || 0;
-                if (prev < 90 && drum.occupancy >= 90 && drum.occupancy < 100) {
-                    showToast(`⚠️ แจ้งเตือนพื้นที่: ${drum.name} เกือบเต็มแล้ว (${drum.occupancy}%)`, 'warning');
-                } else if (prev < 100 && drum.occupancy >= 100) {
-                    showToast(`🚨 แจ้งเตือนพื้นที่: ${drum.name} เต็มความจุแล้ว! (${drum.occupancy}%)`, 'error');
-                }
-                prevOccupancyMap[drum.id] = drum.occupancy;
-            });
-        }
-
-        // Render All Views
-        function renderAll() {
-            const statusList = getInventoryStatus();
+        window.renderAll = function() {
+            const statusList = window.getInventoryStatus();
             checkCapacityAlerts(statusList);
             renderDropdowns(statusList);
             renderDashboard(statusList);
-            renderInventory(statusList);
-            renderHistory();
-            renderSettings();
-            updateCharts();
+            window.renderInventory(statusList);
+            window.renderHistory();
+            window.renderSettings();
+            window.updateCharts();
+        }
+
+        function checkCapacityAlerts(statusList) {
+            statusList.forEach(drum => {
+                const prev = window.prevOccupancyMap[drum.id];
+                const current = drum.occupancy;
+                if (prev !== undefined) {
+                    if (prev < 90 && current >= 90 && current < 100) {
+                        window.showToast(`⚠️ แจ้งเตือนพื้นที่: ${drum.name} ใกล้เต็มแล้ว (${current}%)`, 'warning');
+                    } else if (prev < 100 && current >= 100) {
+                        window.showToast(`🚨 แจ้งเตือนพื้นที่: ${drum.name} เต็มความจุแล้ว! (${current}%)`, 'error');
+                    }
+                }
+                window.prevOccupancyMap[drum.id] = current;
+            });
         }
 
         function renderDropdowns(statusList) {
@@ -614,7 +651,6 @@
             outSelect.innerHTML = outOpts;
         }
 
-        // Render Dashboard
         function renderDashboard(statusList) {
             const container = document.getElementById('dashboard-cards');
             if (!container) return;
@@ -671,22 +707,18 @@
             lucide.createIcons();
         }
 
-        // Charts Update with context safety check
-        function updateCharts() {
+        window.updateCharts = function() {
             const barCanvas = document.getElementById('barChart');
             const lineCanvas = document.getElementById('lineChart');
-            
-            // Early return if canvases are not found
             if (!barCanvas || !lineCanvas) return;
             
-            const statusList = getInventoryStatus();
+            const statusList = window.getInventoryStatus();
             const barCtx = barCanvas.getContext('2d');
             const lineCtx = lineCanvas.getContext('2d');
             
-            // Bar Chart
             if (barCtx) {
-                if (barChartInstance) barChartInstance.destroy();
-                barChartInstance = new Chart(barCtx, {
+                if (window.barChartInstance) window.barChartInstance.destroy();
+                window.barChartInstance = new Chart(barCtx, {
                     type: 'bar',
                     data: {
                         labels: statusList.map(d => d.name),
@@ -699,19 +731,17 @@
                 });
             }
 
-            // Line Chart Trend
             const trendMap = {};
-            transactions.forEach(t => {
+            window.transactions.forEach(t => {
                 if (!trendMap[t.date]) trendMap[t.date] = { inbound: 0, outbound: 0 };
                 if (t.type === 'IN') trendMap[t.date].inbound += t.qty;
                 else trendMap[t.date].outbound += t.qty;
             });
             const sortedDates = Object.keys(trendMap).sort();
             
-            // Line Chart
             if (lineCtx) {
-                if (lineChartInstance) lineChartInstance.destroy();
-                lineChartInstance = new Chart(lineCtx, {
+                if (window.lineChartInstance) window.lineChartInstance.destroy();
+                window.lineChartInstance = new Chart(lineCtx, {
                     type: 'line',
                     data: {
                         labels: sortedDates.length ? sortedDates : ['วันนี้'],
@@ -725,35 +755,20 @@
             }
         }
 
-        // Form Toggles & Handlers
-        function toggleSupplierOther(val) {
-            const otherInput = document.getElementById('in-other-supplier');
-            if (!otherInput) return;
-            if (val === 'Other') otherInput.classList.remove('hidden');
-            else otherInput.classList.add('hidden');
-        }
-
-        function toggleLocationOther(val) {
-            const otherInput = document.getElementById('in-other-location');
-            if (!otherInput) return;
-            if (val === 'อื่นๆ') otherInput.classList.remove('hidden');
-            else otherInput.classList.add('hidden');
-        }
-
-        function handleInboundSubmit(e) {
+        window.handleInboundSubmit = async function(e) {
             e.preventDefault();
             const drumId = document.getElementById('in-drum-type').value;
-            const statusList = getInventoryStatus();
+            const statusList = window.getInventoryStatus();
             const selectedDrum = statusList.find(d => d.id === drumId);
             const qty = Number(document.getElementById('in-qty').value);
 
             if (!Number.isInteger(qty) || qty <= 0) {
-                showToast('จำนวนรับเข้าต้องมากกว่า 0', 'error');
+                window.showToast('จำนวนรับเข้าต้องมากกว่า 0', 'error');
                 return;
             }
 
             if (selectedDrum && (selectedDrum.balance + qty) > selectedDrum.capacity) {
-                showToast('ไม่สามารถรับเข้าได้ พื้นที่จัดเก็บเต็มความจุแล้ว!', 'error');
+                window.showToast('ไม่สามารถรับเข้าได้ พื้นที่จัดเก็บเต็มความจุแล้ว!', 'error');
                 return;
             }
 
@@ -762,7 +777,7 @@
             if (supplierVal === 'Other') {
                 supplier = document.getElementById('in-other-supplier').value.trim();
                 if (!supplier) {
-                    showToast('โปรดระบุชื่อบริษัทผู้ส่ง', 'error');
+                    window.showToast('โปรดระบุชื่อบริษัทผู้ส่ง', 'error');
                     return;
                 }
             }
@@ -772,13 +787,13 @@
             if (locationVal === 'อื่นๆ') {
                 location = document.getElementById('in-other-location').value.trim();
                 if (!location) {
-                    showToast('โปรดระบุตำแหน่งจัดเก็บ', 'error');
+                    window.showToast('โปรดระบุตำแหน่งจัดเก็บ', 'error');
                     return;
                 }
             }
 
             const newTx = {
-                id: generateId('tx'),
+                id: window.generateId('tx'),
                 date: document.getElementById('in-date').value,
                 type: 'IN',
                 drumTypeId: drumId,
@@ -789,68 +804,32 @@
                 remark: document.getElementById('in-remark').value
             };
 
-            transactions.push(newTx);
-            saveState();
-            renderAll();
-            const form = document.getElementById('inbound-form');
-            if (form) form.reset();
-            const dateEl = document.getElementById('in-date');
-            if (dateEl) dateEl.valueAsDate = new Date();
-            showToast('บันทึกรับถังเข้าสำเร็จ', 'success');
+            await addTxToCloud(newTx);
+            document.getElementById('inbound-form').reset();
+            document.getElementById('in-date').valueAsDate = new Date();
+            window.showToast('บันทึกรับถังเข้าสำเร็จ', 'success');
         }
 
-        function setOutboundMode(mode) {
-            outboundMode = mode;
-            const btnFill = document.getElementById('btn-mode-filling');
-            const btnDisp = document.getElementById('btn-mode-disposal');
-            const f1Label = document.querySelector('#outbound-dynamic-field-1 label');
-            const f2Container = document.getElementById('outbound-dynamic-field-2');
-            const submitBtn = document.getElementById('outbound-submit-btn');
-
-            if (mode === 'filling') {
-                if (btnFill) btnFill.className = "flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600";
-                if (btnDisp) btnDisp.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
-                if (f1Label) f1Label.innerText = "ผู้เบิก";
-                const f1Input = document.getElementById('out-field-1');
-                if (f1Input) f1Input.placeholder = "";
-                if (f2Container) f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">หน่วยงาน/แผนก</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
-                if (submitBtn) {
-                    submitBtn.className = "px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-2";
-                    submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกส่งบรรจุ';
-                }
-            } else {
-                if (btnDisp) btnDisp.className = "flex-1 py-3 text-center font-medium bg-red-50 text-red-700 border-b-2 border-red-600";
-                if (btnFill) btnFill.className = "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
-                if (f1Label) f1Label.innerText = "ผู้อนุมัติ";
-                if (f2Container) f2Container.innerHTML = '<label class="block text-sm font-medium text-slate-700 mb-1">เหตุผลการจำหน่าย</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
-                if (submitBtn) {
-                    submitBtn.className = "px-6 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center gap-2";
-                    submitBtn.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึกจำหน่าย';
-                }
-            }
-            lucide.createIcons();
-        }
-
-        function handleOutboundSubmit(e) {
+        window.handleOutboundSubmit = async function(e) {
             e.preventDefault();
             const drumId = document.getElementById('out-drum-type').value;
             const qty = Number(document.getElementById('out-qty').value);
-            const statusList = getInventoryStatus();
+            const statusList = window.getInventoryStatus();
             const selectedDrum = statusList.find(d => d.id === drumId);
 
             if (!Number.isInteger(qty) || qty <= 0) {
-                showToast('จำนวนจ่ายต้องมากกว่า 0', 'error');
+                window.showToast('จำนวนจ่ายต้องมากกว่า 0', 'error');
                 return;
             }
 
             if (selectedDrum && qty > selectedDrum.balance) {
-                showToast('ไม่สามารถจ่ายออกได้ จำนวนในสต๊อกไม่เพียงพอ!', 'error');
+                window.showToast('ไม่สามารถจ่ายออกได้ จำนวนในสต๊อกไม่เพียงพอ!', 'error');
                 return;
             }
 
-            const isFilling = outboundMode === 'filling';
+            const isFilling = window.outboundMode === 'filling';
             const newTx = {
-                id: generateId('tx'),
+                id: window.generateId('tx'),
                 date: document.getElementById('out-date').value,
                 type: isFilling ? 'OUT_FILL' : 'OUT_DISPOSE',
                 drumTypeId: drumId,
@@ -859,18 +838,273 @@
                 [isFilling ? 'department' : 'reason']: document.getElementById('out-field-2').value
             };
 
-            transactions.push(newTx);
-            saveState();
-            renderAll();
-            const form = document.getElementById('outbound-form');
-            if (form) form.reset();
-            const dateEl = document.getElementById('out-date');
-            if (dateEl) dateEl.valueAsDate = new Date();
-            showToast('บันทึกจ่ายถังออกสำเร็จ', 'success');
+            await addTxToCloud(newTx);
+            document.getElementById('outbound-form').reset();
+            document.getElementById('out-date').valueAsDate = new Date();
+            window.showToast('บันทึกจ่ายถังออกสำเร็จ', 'success');
         }
 
-        // Render Inventory Table
-        function renderInventory(statusList) {
+        async function addTxToCloud(newTx) {
+            if (!isAuthReady || !db) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'transactions', newTx.id);
+            await setDoc(docRef, { ...newTx, createdAt: Date.now() });
+            window.sendToGoogleSheet(newTx);
+        }
+
+        window.renderHistory = function() {
+            const tbody = document.getElementById('history-table-body');
+            const searchEl = document.getElementById('history-search');
+            const filterEl = document.getElementById('history-filter');
+            if (!tbody || !searchEl || !filterEl) return;
+
+            const search = searchEl.value.toLowerCase();
+            const filter = filterEl.value;
+
+            let filtered = [...window.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (filter !== 'all') filtered = filtered.filter(t => t.type === filter);
+            if (search) {
+                filtered = filtered.filter(t => {
+                    const drum = window.drumTypes.find(d => d.id === t.drumTypeId)?.name || '';
+                    const detail = `${t.receiver || ''} ${t.supplier || ''} ${t.location || ''} ${t.requester || ''} ${t.department || ''} ${t.approver || ''} ${t.reason || ''} ${t.remark || ''}`.toLowerCase();
+                    return drum.toLowerCase().includes(search) || detail.includes(search) || t.date.includes(search);
+                });
+            }
+
+            tbody.innerHTML = filtered.map(tx => {
+                const drumName = window.drumTypes.find(d => d.id === tx.drumTypeId)?.name || 'Unknown';
+                let label = 'รับเข้า', style = 'text-green-700 bg-green-50 border-green-200';
+                let detail = `ผู้รับ: ${tx.receiver || ''} | จาก: ${tx.supplier || ''} | โซน: ${tx.location || ''}`;
+                if (tx.type === 'OUT_FILL') {
+                    label = 'ส่งบรรจุ'; style = 'text-blue-700 bg-blue-50 border-blue-200';
+                    detail = `ผู้เบิก: ${tx.requester || ''} | แผนก: ${tx.department || ''}`;
+                } else if (tx.type === 'OUT_DISPOSE') {
+                    label = 'จำหน่าย'; style = 'text-red-700 bg-red-50 border-red-200';
+                    detail = `ผู้อนุมัติ: ${tx.approver || ''} | เหตุผล: ${tx.reason || ''}`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 whitespace-nowrap text-slate-700">${escapeHTML(tx.date)}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded text-xs font-medium border ${style}">${label}</span></td>
+                        <td class="p-3 font-medium text-slate-800">${escapeHTML(drumName)}</td>
+                        <td class="p-3 text-right font-semibold text-slate-800">${tx.qty.toLocaleString()}</td>
+                        <td class="p-3 text-slate-600 truncate max-w-xs">${escapeHTML(detail)}</td>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center gap-3">
+                                <button type="button" onclick="window.openEditModal('${escapeHTML(tx.id)}')" class="text-slate-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                <button type="button" onclick="window.deleteTransaction('${escapeHTML(tx.id)}')" class="text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        window.deleteTransaction = async function(id) {
+            if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
+                if (db && isAuthReady) {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id));
+                }
+                window.showToast('ลบรายการสำเร็จ', 'success');
+            }
+        }
+
+        window.saveEditedTransaction = async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const tx = window.transactions.find(t => t.id === id);
+            if (!tx) return;
+            
+            const newQty = Number(document.getElementById('edit-qty').value);
+            if (!Number.isInteger(newQty) || newQty <= 0) {
+                window.showToast('จำนวนไม่ถูกต้อง', 'error');
+                return;
+            }
+            
+            const oldQty = tx.qty;
+            const statusList = window.getInventoryStatus();
+            const drumStatus = statusList.find(d => d.id === tx.drumTypeId);
+            
+            if (tx.type === 'OUT_FILL' || tx.type === 'OUT_DISPOSE') {
+                const available = drumStatus.balance + oldQty;
+                if (newQty > available) {
+                    window.showToast('แก้ไขไม่ได้ จำนวนในสต๊อกไม่เพียงพอ', 'error');
+                    return;
+                }
+            }
+            
+            const remarkVal = document.getElementById('edit-remark').value;
+            const updatedData = {
+                qty: newQty,
+                date: document.getElementById('edit-date').value
+            };
+
+            if (tx.type === 'IN') updatedData.remark = remarkVal;
+            else if (tx.type === 'OUT_FILL') updatedData.department = remarkVal;
+            else updatedData.reason = remarkVal;
+            
+            if (db && isAuthReady) {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'transactions', id), updatedData);
+            }
+            
+            window.closeEditModal();
+            window.showToast('แก้ไขข้อมูลสำเร็จ', 'success');
+        }
+
+        window.renderSettings = function() {
+            const container = document.getElementById('settings-drum-list');
+            if (!container) return;
+            container.innerHTML = window.drumTypes.map(drum => `
+                <div class="flex items-center justify-between p-4 border border-slate-200 rounded-lg bg-slate-50 gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-5 h-5 rounded-full border border-black/10" style="background-color: ${escapeHTML(drum.color)}"></div>
+                        <div>
+                            <span class="font-semibold text-slate-800 text-lg">${escapeHTML(drum.name)}</span>
+                            <div class="text-sm text-slate-500">ความจุสูงสุด: ${drum.capacity.toLocaleString()} ใบ</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="window.showQR('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-md" title="QR Code"><i data-lucide="qr-code" class="w-5 h-5"></i></button>
+                        <button type="button" onclick="window.deleteDrumType('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md" title="ลบ"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.handleAddDrumType = async function(e) {
+            e.preventDefault();
+            const nameEl = document.getElementById('new-drum-name');
+            const capEl = document.getElementById('new-drum-capacity');
+            const colorEl = document.getElementById('new-drum-color');
+
+            const name = nameEl.value.trim();
+            const capacity = Number(capEl.value);
+            const color = colorEl.value;
+            
+            if (!name) return window.showToast('โปรดระบุชื่อประเภทถัง', 'error');
+            if (!Number.isInteger(capacity) || capacity <= 0) return window.showToast('ความจุต้องเป็นจำนวนเต็มบวกเท่านั้น', 'error');
+            if (window.drumTypes.some(d => d.name.toLowerCase() === name.toLowerCase())) {
+                return window.showToast('มีประเภทถังชื่อนี้ในระบบแล้ว', 'error');
+            }
+
+            const newId = window.generateId('dt');
+            if (db && isAuthReady) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'drumTypes', newId), { name, capacity, color });
+            }
+            e.target.reset();
+            window.showToast('เพิ่มประเภทถังสำเร็จ', 'success');
+        }
+
+        window.deleteDrumType = async function(id) {
+            if (window.transactions.some(t => t.drumTypeId === id)) {
+                return window.showToast('ไม่สามารถลบได้ เนื่องจากมีประวัติการทำรายการแล้ว', 'error');
+            }
+            if (confirm('ยืนยันการลบประเภทถังนี้?')) {
+                if (db && isAuthReady) {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'drumTypes', id));
+                }
+                window.showToast('ลบประเภทถังสำเร็จ', 'success');
+            }
+        }
+
+        let urlProcessed = false;
+        function checkURLParams() {
+            if (urlProcessed || window.drumTypes.length === 0) return;
+            const params = new URLSearchParams(window.location.search);
+            const action = params.get('action');
+            const drumId = params.get('drumId');
+            const supplier = params.get('supplier');
+            const location = params.get('location');
+
+            if (action === 'inbound' && drumId) {
+                urlProcessed = true;
+                window.switchTab('inbound');
+                setTimeout(() => {
+                    const drumSelect = document.getElementById('in-drum-type');
+                    if (drumSelect) drumSelect.value = drumId;
+                    if (supplier) {
+                        const supSelect = document.getElementById('in-supplier');
+                        if (supSelect) { supSelect.value = supplier; window.toggleSupplierOther(supplier); }
+                    }
+                    if (location) {
+                        const locSelect = document.getElementById('in-location');
+                        if (locSelect) { locSelect.value = location; window.toggleLocationOther(location); }
+                    }
+                    window.showToast('สแกน QR สำเร็จ! พร้อมบันทึกรับเข้า', 'success');
+                }, 300);
+            }
+        }
+
+        window.startScanner = function() {
+            const container = document.getElementById('scanner-container');
+            container.classList.remove('hidden');
+            
+            if (!window.html5QrcodeScanner) {
+                window.html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+            }
+
+            window.html5QrcodeScanner.render((decodedText) => {
+                try {
+                    const url = new URL(decodedText);
+                    const drumId = url.searchParams.get("drumId");
+                    const supplier = url.searchParams.get("supplier");
+                    const location = url.searchParams.get("location");
+                    
+                    if (drumId) {
+                        window.stopScanner();
+                        window.switchTab('inbound');
+                        setTimeout(() => {
+                            document.getElementById('in-drum-type').value = drumId;
+                            if (supplier) { document.getElementById('in-supplier').value = supplier; window.toggleSupplierOther(supplier); }
+                            if (location) { document.getElementById('in-location').value = location; window.toggleLocationOther(location); }
+                            window.showToast('สแกนสำเร็จ พร้อมบันทึก', 'success');
+                        }, 200);
+                    }
+                } catch(e) {
+                    window.showToast('รูปแบบ QR ไม่ถูกต้อง', 'error');
+                }
+            }, (error) => { /* Ignore non-reads */ });
+        }
+
+        window.stopScanner = function() {
+            if (window.html5QrcodeScanner) {
+                window.html5QrcodeScanner.clear().then(() => {
+                    document.getElementById('scanner-container').classList.add('hidden');
+                });
+            } else {
+                document.getElementById('scanner-container').classList.add('hidden');
+            }
+        }
+
+        window.showQR = function(id) {
+            const drum = window.drumTypes.find(d => d.id === id);
+            if (!drum) return;
+            const titleEl = document.getElementById('qr-modal-title');
+            const container = document.getElementById('qr-image-container');
+            const modal = document.getElementById('qr-modal');
+
+            if (titleEl) titleEl.innerText = drum.name;
+            let cleanBaseUrl = window.appBaseUrl;
+            
+            const targetUrl = `${cleanBaseUrl}?action=inbound&drumId=${encodeURIComponent(drum.id)}&supplier=VSC&location=${encodeURIComponent('ล็อค 1')}`;
+            window.currentPrintQRUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
+            
+            if (container) {
+                container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}" class="w-48 h-48 mx-auto" alt="QR">`;
+            }
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        window.printQR = function() {
+            const title = document.getElementById('qr-modal-title').innerText;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<html><head><title>Print QR - ${title}</title></head><body style="text-align:center;font-family:sans-serif;margin-top:50px;"><h2>จุดรับ${title}</h2><img src="${window.currentPrintQRUrl}" style="max-width:80%;" /><p>แสกนเพื่อบันทึกรับถัง</p><script>window.onload=function(){window.print();window.close();}<\/script></body></html>`);
+            printWindow.document.close();
+        }
+
+        window.renderInventory = function(statusList) {
             const tbody = document.getElementById('inventory-table-body');
             if (!tbody) return;
             tbody.innerHTML = statusList.map(item => `
@@ -894,266 +1128,23 @@
             `).join('');
         }
 
-        // Render History Table & Actions
-        function renderHistory() {
-            const tbody = document.getElementById('history-table-body');
-            const searchEl = document.getElementById('history-search');
-            const filterEl = document.getElementById('history-filter');
-            if (!tbody || !searchEl || !filterEl) return;
-
-            const search = searchEl.value.toLowerCase();
-            const filter = filterEl.value;
-
-            let filtered = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
-            if (filter !== 'all') filtered = filtered.filter(t => t.type === filter);
-            if (search) {
-                filtered = filtered.filter(t => {
-                    const drum = drumTypes.find(d => d.id === t.drumTypeId)?.name || '';
-                    const detail = `
-                        ${t.receiver || ''}
-                        ${t.supplier || ''}
-                        ${t.location || ''}
-                        ${t.requester || ''}
-                        ${t.department || ''}
-                        ${t.approver || ''}
-                        ${t.reason || ''}
-                        ${t.remark || ''}
-                    `.toLowerCase();
-                    return drum.toLowerCase().includes(search) || detail.includes(search) || t.date.includes(search);
-                });
-            }
-
-            tbody.innerHTML = filtered.map(tx => {
-                const drumName = drumTypes.find(d => d.id === tx.drumTypeId)?.name || 'Unknown';
-                let label = 'รับเข้า', style = 'text-green-700 bg-green-50 border-green-200';
-                let detail = `ผู้รับ: ${tx.receiver || ''} | จาก: ${tx.supplier || ''} | โซน: ${tx.location || ''}`;
-                if (tx.type === 'OUT_FILL') {
-                    label = 'ส่งบรรจุ'; style = 'text-blue-700 bg-blue-50 border-blue-200';
-                    detail = `ผู้เบิก: ${tx.requester || ''} | แผนก: ${tx.department || ''}`;
-                } else if (tx.type === 'OUT_DISPOSE') {
-                    label = 'จำหน่าย'; style = 'text-red-700 bg-red-50 border-red-200';
-                    detail = `ผู้อนุมัติ: ${tx.approver || ''} | เหตุผล: ${tx.reason || ''}`;
-                }
-
-                return `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 whitespace-nowrap text-slate-700">${escapeHTML(tx.date)}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded text-xs font-medium border ${style}">${label}</span></td>
-                        <td class="p-3 font-medium text-slate-800">${escapeHTML(drumName)}</td>
-                        <td class="p-3 text-right font-semibold text-slate-800">${tx.qty.toLocaleString()}</td>
-                        <td class="p-3 text-slate-600 truncate max-w-xs">${escapeHTML(detail)}</td>
-                        <td class="p-3 text-center">
-                            <div class="flex items-center justify-center gap-3">
-                                <button type="button" onclick="openEditModal('${escapeHTML(tx.id)}')" class="text-slate-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                <button type="button" onclick="deleteTransaction('${escapeHTML(tx.id)}')" class="text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        function deleteTransaction(id) {
-            if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
-                transactions = transactions.filter(t => t.id !== id);
-                saveState();
-                renderAll();
-                showToast('ลบรายการสำเร็จ', 'success');
-            }
-        }
-
-        function openEditModal(id) {
-            const tx = transactions.find(t => t.id === id);
-            if (!tx) return;
-            const editId = document.getElementById('edit-id');
-            const editDate = document.getElementById('edit-date');
-            const editQty = document.getElementById('edit-qty');
-            const editRemark = document.getElementById('edit-remark');
-            const editModal = document.getElementById('edit-modal');
-
-            if (editId) editId.value = tx.id;
-            if (editDate) editDate.value = tx.date;
-            if (editQty) editQty.value = tx.qty;
-            if (editRemark) editRemark.value = tx.remark || tx.reason || tx.department || '';
-            if (editModal) editModal.classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            const editModal = document.getElementById('edit-modal');
-            if (editModal) editModal.classList.add('hidden');
-        }
-
-        function saveEditedTransaction(e) {
-            e.preventDefault();
-            
-            const id = document.getElementById('edit-id').value;
-            const tx = transactions.find(t => t.id === id);
-            
-            if (!tx) return;
-            
-            const newQty = Number(document.getElementById('edit-qty').value);
-            
-            if (!Number.isInteger(newQty) || newQty <= 0) {
-                showToast('จำนวนไม่ถูกต้อง', 'error');
-                return;
-            }
-            
-            const oldQty = tx.qty;
-            const oldDate = tx.date; // เก็บค่าวันที่เดิมไว้ด้วยเผื่อกรณีต้อง revert
-            
-            const statusList = getInventoryStatus();
-            const drumStatus = statusList.find(d => d.id === tx.drumTypeId);
-            
-            if (tx.type === 'OUT_FILL' || tx.type === 'OUT_DISPOSE') {
-                const available = drumStatus.balance + oldQty;
-                if (newQty > available) {
-                    showToast('แก้ไขไม่ได้ จำนวนในสต๊อกไม่เพียงพอ', 'error');
-                    return;
-                }
-            }
-            
-            tx.qty = newQty;
-            tx.date = document.getElementById('edit-date').value;
-            
-            const remarkVal = document.getElementById('edit-remark').value;
-            
-            if (tx.type === 'IN') {
-                tx.remark = remarkVal;
-            } else if (tx.type === 'OUT_FILL') {
-                tx.department = remarkVal;
-            } else {
-                tx.reason = remarkVal;
-            }
-            
-            saveState();
-            renderAll();
-            closeEditModal();
-            
-            showToast('แก้ไขข้อมูลสำเร็จ', 'success');
-        }
-
-        // Settings (Admin)
-        function renderSettings() {
-            const container = document.getElementById('settings-drum-list');
-            if (!container) return;
-            container.innerHTML = drumTypes.map(drum => `
-                <div class="flex items-center justify-between p-4 border border-slate-200 rounded-lg bg-slate-50 gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-5 h-5 rounded-full border border-black/10" style="background-color: ${escapeHTML(drum.color)}"></div>
-                        <div>
-                            <span class="font-semibold text-slate-800 text-lg">${escapeHTML(drum.name)}</span>
-                            <div class="text-sm text-slate-500">ความจุสูงสุด: ${drum.capacity.toLocaleString()} ใบ</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" onclick="showQR('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-md" title="QR Code"><i data-lucide="qr-code" class="w-5 h-5"></i></button>
-                        <button type="button" onclick="deleteDrumType('${escapeHTML(drum.id)}')" class="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md" title="ลบ"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function handleAddDrumType(e) {
-            e.preventDefault();
-            const nameEl = document.getElementById('new-drum-name');
-            const capEl = document.getElementById('new-drum-capacity');
-            const colorEl = document.getElementById('new-drum-color');
-            if (!nameEl || !capEl || !colorEl) return;
-
-            const name = nameEl.value.trim();
-            const capacity = Number(capEl.value);
-            const color = colorEl.value;
-            
-            if (!name) {
-                showToast('โปรดระบุชื่อประเภทถัง', 'error');
-                return;
-            }
-            
-            if (!Number.isInteger(capacity) || capacity <= 0) {
-                showToast('ความจุต้องเป็นจำนวนเต็มบวกเท่านั้น', 'error');
-                return;
-            }
-            
-            if (drumTypes.some(d => d.name.toLowerCase() === name.toLowerCase())) {
-                showToast('มีประเภทถังชื่อนี้ในระบบแล้ว', 'error');
-                return;
-            }
-
-            const newId = generateId('dt');
-
-            drumTypes.push({ id: newId, name, capacity, color });
-            saveState();
-            renderAll();
-            e.target.reset();
-            showToast('เพิ่มประเภทถังสำเร็จ', 'success');
-        }
-
-        function deleteDrumType(id) {
-            if (transactions.some(t => t.drumTypeId === id)) {
-                showToast('ไม่สามารถลบได้ เนื่องจากมีประวัติการทำรายการแล้ว', 'error');
-                return;
-            }
-            if (confirm('ยืนยันการลบประเภทถังนี้?')) {
-                drumTypes = drumTypes.filter(d => d.id !== id);
-                saveState();
-                renderAll();
-                showToast('ลบประเภทถังสำเร็จ', 'success');
-            }
-        }
-
-        function showQR(id) {
-            const drum = drumTypes.find(d => d.id === id);
-            if (!drum) return;
-            const titleEl = document.getElementById('qr-modal-title');
-            const container = document.getElementById('qr-image-container');
-            const modal = document.getElementById('qr-modal');
-
-            if (titleEl) titleEl.innerText = drum.name;
-            
-            // ใช้ appBaseUrl ที่ตั้งค่าไว้แทน window.location โดยตรง
-            let cleanBaseUrl = appBaseUrl;
-            if(cleanBaseUrl.endsWith('index.html')) {
-                // ถ้ามี index.html ให้คงไว้
-            } else if (!cleanBaseUrl.endsWith('/')) {
-                // ถ้าไม่มี trailing slash ป้องกัน URL ผิดเพี้ยน
-                // cleanBaseUrl += '/'; 
-            }
-            
-            const targetUrl = `${cleanBaseUrl}?action=inbound&drumId=${encodeURIComponent(drum.id)}&supplier=${encodeURIComponent('VSC')}&location=${encodeURIComponent('ล็อค 1')}`;
-            
-            if (container) {
-                container.innerHTML = `
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(targetUrl)}" class="w-48 h-48 mx-auto" alt="QR">
-                `;
-            }
-            if (modal) modal.classList.remove('hidden');
-        }
-
-        function closeQRModal() {
-            const modal = document.getElementById('qr-modal');
-            if (modal) modal.classList.add('hidden');
-        }
-
-        // CSV Exports
-        function exportInventoryCSV() {
-            const statusList = getInventoryStatus();
+        window.exportInventoryCSV = function() {
+            const statusList = window.getInventoryStatus();
             const headers = ["ประเภทถัง", "รับเข้ารวม", "ส่งบรรจุ", "จำหน่าย", "คงเหลือ", "ความจุ", "เปอร์เซ็นต์การใช้งาน"];
             const rows = statusList.map(i => [i.name, i.qtyIn, i.qtyOutFill, i.qtyOutDispose, i.balance, i.capacity, i.occupancy + "%"]);
             downloadCSV("inventory_" + new Date().toISOString().slice(0,10) + ".csv", [headers, ...rows]);
-            showToast("Export CSV สำเร็จ");
+            window.showToast("Export CSV สำเร็จ");
         }
 
-        function exportHistoryCSV() {
+        window.exportHistoryCSV = function() {
             const headers = ["วันที่", "ประเภทรายการ", "ประเภทถัง", "จำนวน", "รายละเอียด"];
-            const rows = transactions.map(t => {
-                const drumName = drumTypes.find(d => d.id === t.drumTypeId)?.name || "";
-                let detail = t.type === 'IN' ? `${t.receiver} - ${t.supplier} (${t.location || ''})` : t.type === 'OUT_FILL' ? `${t.requester} - ${t.department}` : `${t.approver} - ${t.reason}`;
-                return [t.date, t.type, drumName, t.qty, `"${detail}"`];
+            const rows = window.transactions.map(tx => {
+                const drumName = window.drumTypes.find(d => d.id === tx.drumTypeId)?.name || "";
+                let detail = tx.type === 'IN' ? `${tx.receiver} - ${tx.supplier} (${tx.location || ''})` : tx.type === 'OUT_FILL' ? `${tx.requester} - ${tx.department}` : `${tx.approver} - ${tx.reason}`;
+                return [tx.date, tx.type, drumName, tx.qty, `"${detail}"`];
             });
             downloadCSV("history_" + Date.now() + ".csv", [headers, ...rows]);
-            showToast("Export History CSV สำเร็จ");
+            window.showToast("Export History CSV สำเร็จ");
         }
 
         function downloadCSV(filename, rows) {
@@ -1165,6 +1156,49 @@
             link.click();
             URL.revokeObjectURL(link.href);
         }
+
+        window.toggleSidebar = () => { const s = document.getElementById('sidebar'); if (s) s.classList.toggle('-translate-x-full'); }
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`)?.classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('hover:bg-slate-800', 'hover:text-white', 'text-slate-300');
+            });
+            const activeBtn = document.querySelector(`.nav-btn[data-target="${tabId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-blue-600', 'text-white');
+                activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+            }
+            if (window.innerWidth < 768) window.toggleSidebar();
+            if (tabId === 'dashboard') window.updateCharts();
+        }
+        window.setOutboundMode = (mode) => {
+            window.outboundMode = mode;
+            document.getElementById('btn-mode-filling').className = mode === 'filling' ? "flex-1 py-3 text-center font-medium bg-blue-50 text-blue-700 border-b-2 border-blue-600" : "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
+            document.getElementById('btn-mode-disposal').className = mode === 'disposal' ? "flex-1 py-3 text-center font-medium bg-red-50 text-red-700 border-b-2 border-red-600" : "flex-1 py-3 text-center font-medium text-slate-500 hover:bg-slate-50";
+            document.querySelector('#outbound-dynamic-field-1 label').innerText = mode === 'filling' ? "ผู้เบิก" : "ผู้อนุมัติ";
+            document.getElementById('outbound-dynamic-field-2').innerHTML = mode === 'filling' ? '<label class="block text-sm font-medium text-slate-700 mb-1">หน่วยงาน/แผนก</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">' : '<label class="block text-sm font-medium text-slate-700 mb-1">เหตุผลการจำหน่าย</label><input type="text" id="out-field-2" required class="w-full rounded-md border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">';
+            const btn = document.getElementById('outbound-submit-btn');
+            btn.className = `px-6 py-2 rounded-lg text-white ${mode === 'filling' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700'} transition-colors flex items-center gap-2`;
+            btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> บันทึก${mode === 'filling' ? 'ส่งบรรจุ' : 'จำหน่าย'}`;
+            lucide.createIcons();
+        }
+        window.toggleSupplierOther = (val) => { document.getElementById('in-other-supplier')?.classList.toggle('hidden', val !== 'Other'); }
+        window.toggleLocationOther = (val) => { document.getElementById('in-other-location')?.classList.toggle('hidden', val !== 'อื่นๆ'); }
+        window.openEditModal = (id) => {
+            const tx = window.transactions.find(t => t.id === id);
+            if (!tx) return;
+            document.getElementById('edit-id').value = tx.id;
+            document.getElementById('edit-date').value = tx.date;
+            document.getElementById('edit-qty').value = tx.qty;
+            document.getElementById('edit-remark').value = tx.remark || tx.reason || tx.department || '';
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+        window.closeEditModal = () => { document.getElementById('edit-modal').classList.add('hidden'); }
+        window.closeQRModal = () => { document.getElementById('qr-modal').classList.add('hidden'); }
+        window.saveBaseUrl = () => { window.appBaseUrl = document.getElementById('sys-base-url').value.trim(); localStorage.setItem('drum_base_url', window.appBaseUrl); window.showToast('บันทึก Base URL สำเร็จ'); }
+        window.saveGSheetUrl = () => { window.gSheetUrl = document.getElementById('sys-gsheet-url').value.trim(); localStorage.setItem('drum_gsheet_url', window.gSheetUrl); window.showToast('บันทึก Google Sheet URL สำเร็จ'); }
     </script>
 </body>
 </html>
